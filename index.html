@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <title>Select multiple Features</title>
+    <!-- The line below is only needed for old environments like Internet Explorer and Android 4.x -->
+    <script src="https://cdn.polyfill.io/v2/polyfill.min.js?features=fetch,requestAnimationFrame,Element.prototype.classList,URL"></script>
+   
+<link rel="stylesheet" type="text/css" media="all" href="css/ol.css" />
+    <style>
+      .map {
+        width: 100%;
+        height:300px;
+      }
+      
+      
+      #countryMap {
+        width: 70%;
+        height:300px;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="map" class="map"></div>
+    <div id="countryMap" class="map inline"></div> 
+    <script src="index.js"></script>
+    <div><b id="info"></b></div>
+    <div><b id="info1"></b></div>
+    <div id="mouse-position"></div> 
+  </body>
+</html>
