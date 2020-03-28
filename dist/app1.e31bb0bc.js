@@ -59883,7 +59883,9 @@ var _jquery = _interopRequireDefault(require("jquery"));
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 var url_distribution = "https://cors-anywhere.herokuapp.com/http://opendata.ecdc.europa.eu/covid19/casedistribution/json/";
+var url_distribution1 = "https://github.com/CSSEGISandData/COVID-19/blob/master/csse_covid_19_data/csse_covid_19_daily_reports/03-27-2020.csv";
 var url_us = "https://cdn.jsdelivr.net/npm/us-atlas@3/states-10m.json";
+var url_mexico = "https://raw.githubusercontent.com/aaronali/click_that_hood/master/public/data/mexico.geojson";
 var caseDisribution;
 
 function getCaseDistribution() {
@@ -59892,9 +59894,30 @@ function getCaseDistribution() {
     success: function success(data) {
       caseDisribution = data;
       console.log(data);
+      getDailyReport();
     },
     error: function error(e) {
       console.log(e);
+    }
+  });
+}
+
+var caseDataMaster = "https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/csse_covid_19_daily_reports/";
+
+function getDailyReport() {
+  var d = new Date();
+  var n = "03-27-2020.csv";
+
+  _jquery.default.getJSON({
+    url: caseDataMaster + n,
+    success: function success(data) {
+      caseDisribution = data;
+      console.log(data);
+    },
+    error: function error(e) {
+      console.log(e.responseText);
+      var s = e.responseText.split(/\n/);
+      console.log(s);
     }
   });
 }
@@ -59965,7 +59988,8 @@ var vectorLayer = new _Vector.default({
 
     return _style;
   }
-});
+}); //SOURCES
+
 var source = new _Vector2.default({
   url: 'https://openlayers.org/en/latest/examples/data/geojson/countries.geojson',
   format: new _GeoJSON.default()
@@ -59973,7 +59997,8 @@ var source = new _Vector2.default({
 var source2 = new _Vector2.default({
   url: 'https://raw.githubusercontent.com/aaronali/click_that_hood/master/public/data/canada.geojson',
   format: new _GeoJSON.default()
-});
+}); //VECTOR LAYERS
+
 var vectorLayer1 = new _Vector.default({
   source: source2,
   style: function style(feature) {
@@ -59989,8 +60014,13 @@ var vectorLayerCountry = new _Vector.default({
 
     return _style;
   }
-});
+}); //VIEWS
+
 var view = new _View.default({
+  center: [0, 0],
+  zoom: 1
+});
+var viewCountry = new _View.default({
   center: [0, 0],
   zoom: 1
 });
@@ -60006,7 +60036,7 @@ var map = new _Map.default({
 var countryMap = new _Map.default({
   layers: [vectorLayerCountry],
   target: 'countryMap',
-  view: view
+  view: viewCountry
 });
 var highlightStyle = new _style2.Style({
   stroke: new _style2.Stroke({
@@ -60035,12 +60065,22 @@ var featureOverlay = new _Vector.default({
     return highlightStyle;
   }
 });
+var featureOverlayCountry = new _Vector.default({
+  source: new _Vector2.default(),
+  map: countryMap,
+  style: function style(feature) {
+    highlightStyle.getText().setText(feature.get('name'));
+    return highlightStyle;
+  }
+});
 var highlight;
+var highlightCountry;
 
-var displayFeatureInfo = function displayFeatureInfo(pixel) {
-  var feature = map.forEachFeatureAtPixel(pixel, function (feature) {
+var displayFeatureInfo = function displayFeatureInfo(pixel, m) {
+  var feature = m.forEachFeatureAtPixel(pixel, function (feature) {
     return feature;
   });
+  console.log(m);
   var info = document.getElementById('info');
 
   if (feature) {
@@ -60063,6 +60103,38 @@ var displayFeatureInfo = function displayFeatureInfo(pixel) {
     highlight = feature;
   }
 };
+/**
+ * Display country specific  info 
+ * 
+ */
+
+
+var displayCountryFeatureInfo = function displayCountryFeatureInfo(pixel, m) {
+  console.log(m);
+  var feature = m.forEachFeatureAtPixel(pixel, function (feature) {
+    return feature;
+  });
+  console.log(m);
+  var info = document.getElementById('info'); //	if (feature) {
+  //	info.innerHTML = "<center><h3>"+feature.getId() + ': ' + feature.get('name')+"</center></h3>";
+  //	selectedCountry=feature.getId() ;
+  //	getCountryCases(selectedCountry);
+  //	} else {
+  //	info.innerHTML = '&nbsp;';
+  //	} 
+
+  if (feature !== highlight) {
+    if (highlightCountry) {
+      featureOverlayCountry.getSource().removeFeature(highlightCountry);
+    }
+
+    if (feature) {
+      featureOverlayCountry.getSource().addFeature(feature);
+    }
+
+    highlightCountry = feature;
+  }
+};
 
 map.stek = null;
 map.on('click', function (evt) {
@@ -60074,14 +60146,16 @@ map.on('click', function (evt) {
   }
 
   var pixel = map.getEventPixel(evt.originalEvent);
-  displayFeatureInfo(pixel);
-  displayFeatureInfo(evt.pixel);
+  displayFeatureInfo(pixel, map);
+  displayFeatureInfo(evt.pixel, map);
   var cord = map.getEventCoordinate(evt);
   cord = evt.coordinate;
   console.log(mousePositionControl);
   var size = map.getSize();
   view.setCenter(cord);
   view.setZoom(4);
+  viewCountry.setZoom(3);
+  viewCountry.setCenter(cord);
 
   if (map.stek != null) {
     countryMap.layers = map.stek;
@@ -60102,16 +60176,33 @@ map.on('click', function (evt) {
       format: new _GeoJSON.default()
     }));
   }
+
+  var vecLayUrl = null;
+
+  switch (selectedCountry) {
+    case "MEX":
+      {
+        vecLayUrl = url_mexico;
+      }
+  }
+
+  if (vecLayUrl != null) {
+    vectorLayerCountry.setSource(new _Vector2.default({
+      url: vecLayUrl,
+      format: new _GeoJSON.default()
+    }));
+  }
 });
 var url_us_geo_Json = "https://raw.githubusercontent.com/aaronali/click_that_hood/master/public/data/united-states.geojson";
-var projectionSelect = document.getElementById('projection');
-projectionSelect.addEventListener('change', function (event) {
-  mousePositionControl.setProjection(event.target.value);
-});
-var precisionInput = document.getElementById('precision');
-precisionInput.addEventListener('change', function (event) {
-  var format = (0, _coordinate.createStringXY)(event.target.valueAsNumber);
-  mousePositionControl.setCoordinateFormat(format);
+countryMap.on('click', function (evt) {
+  console.log(evt); //  vectorLayerCountry.setSource(null);
+
+  if (evt.dragging) {
+    return;
+  }
+
+  var pixel = countryMap.getEventPixel(evt.originalEvent);
+  displayCountryFeatureInfo(evt.pixel, countryMap);
 });
 },{"ol/ol.css":"node_modules/ol/ol.css","ol/Map":"node_modules/ol/Map.js","ol/View":"node_modules/ol/View.js","ol/format/GeoJSON":"node_modules/ol/format/GeoJSON.js","ol/layer/Vector":"node_modules/ol/layer/Vector.js","ol/source/Vector":"node_modules/ol/source/Vector.js","ol/style":"node_modules/ol/style.js","ol/control":"node_modules/ol/control.js","ol/control/MousePosition":"node_modules/ol/control/MousePosition.js","ol/coordinate":"node_modules/ol/coordinate.js","jquery":"node_modules/jquery/dist/jquery.js"}],"node_modules/parcel-bundler/src/builtins/hmr-runtime.js":[function(require,module,exports) {
 var global = arguments[3];
@@ -60141,7 +60232,7 @@ var parent = module.bundle.parent;
 if ((!parent || !parent.isParcelRequire) && typeof WebSocket !== 'undefined') {
   var hostname = "" || location.hostname;
   var protocol = location.protocol === 'https:' ? 'wss' : 'ws';
-  var ws = new WebSocket(protocol + '://' + hostname + ':' + "61512" + '/');
+  var ws = new WebSocket(protocol + '://' + hostname + ':' + "57734" + '/');
 
   ws.onmessage = function (event) {
     checkedAssets = {};
