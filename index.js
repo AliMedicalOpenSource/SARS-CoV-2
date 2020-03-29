@@ -8,75 +8,210 @@ import {Fill, Stroke, Style, Text} from 'ol/style';
 import {defaults as defaultControls} from 'ol/control';
 import MousePosition from 'ol/control/MousePosition';
 import {createStringXY} from 'ol/coordinate';
-import $ from "jquery";
+import $ from "jquery"; 
+const csvFilePath='<path to csv file>'
+const csv=require('csvtojson')
+
+
+var url_casesComfirmed='https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/csse_covid_19_time_series/time_series_covid19_confirmed_global.csv';
+var url_casesRecovered='https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/csse_covid_19_time_series/time_series_covid19_recovered_global.csv';
+var url_casesDeaths="https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/csse_covid_19_time_series/time_series_covid19_deaths_global.csv";
+
+
 var url_distribution = "https://cors-anywhere.herokuapp.com/http://opendata.ecdc.europa.eu/covid19/casedistribution/json/";
 var url_distribution1="https://github.com/CSSEGISandData/COVID-19/blob/master/csse_covid_19_data/csse_covid_19_daily_reports/03-27-2020.csv";
 
 var url_us =	"https://cdn.jsdelivr.net/npm/us-atlas@3/states-10m.json";
 var url_mexico ="https://raw.githubusercontent.com/aaronali/click_that_hood/master/public/data/mexico.geojson";
-
+var countryData=[];
 var caseDisribution; 
+
+var dataRecovered = [];
+var dataDeaths = [];
+var dataComfirmed={};
+
+
+function getDateString(d){ 
+		  if(d===undefined){
+			  d = new Date();
+		  } 
+		 return d.toLocaleString().split(',')[0];
+}
+
+
+
+
+
 function getCaseDistribution( ) {
 	$.getJSON({
 		url: url_distribution,
 		success: function(data){
 			caseDisribution=data;
 			console.log(data);
-
-			getDailyReport();
+ 
 		},
 		error: function (e){
 			console.log(e);
 		}
 	})
-} 
-
+}    
 var caseDataMaster="https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/csse_covid_19_daily_reports/";
 function getDailyReport(){
-	 var d = new Date();
-	  var n = "03-27-2020.csv";
-	$.getJSON({
-		url: caseDataMaster+n,
-		success: function(data){
-			caseDisribution=data;
-			console.log(data);
-		},
-		error: function (e){
-			console.log(e.responseText);
-			var s = e.responseText.split(/\n/);
-			console.log(s);
-		}
-	})
+//	 var d = new Date();
+//	  var n =  url_casesComfirmed ;
+//	$.getJSON({
+//		url: caseDataMaster+n,
+//		success: function(data){
+//			caseDisribution=data; 
+//			for( var temp = 0 ; temp <data.length; temp++){
+//				var f = data[temp];
+//				 if(countryData[f.Country_Region]==undefined){
+//					 countryData[f.Country_Region]=[]
+//				 }
+//				 countryData[f.Country_Region].push(f);
+//			} 
+//			const jsonArray=  csv().fromFile(url_casesComfirmed);
+//			console.log(jsonArray);
+//		},
+//		error: function (e){
+//			console.log(e.responseText);
+//			var s = e.responseText.split(/\n/);
+//			console.log(s);
+//		}
+//	})
+ 
+	$.get(url_casesComfirmed, function( data ) {
+	  $( ".result" ).html( data );
+	 
+	  
+	  csv( )
+	  .fromString(data)
+	  .subscribe((jsonObj)=>{
+		  
+		  countryData.push(jsonObj);
+	  });
+	  console.log(countryData)
+	});
 	
+
+	 
+	$.get(url_casesRecovered, function( data ) {
+	  $( ".result" ).html( data );
+	 
+	  
+	  csv( )
+	  .fromString(data)
+	  .subscribe((jsonObj)=>{
+		  
+		  dataRecovered.push(jsonObj);
+	  });
+	  console.log(dataRecovered)
+	});
+	
+	$.get(url_casesDeaths, function( data ) {
+		  $( ".result" ).html( data );
+		 
+		  
+		  csv( )
+		  .fromString(data)
+		  .subscribe((jsonObj)=>{
+			  
+			  dataDeaths.push(jsonObj);
+		  });
+		  console.log(dataDeaths)
+		});
+	
+	
+	
+	
+	var tt="https://cors-anywhere.herokuapp.com/https://coronavirus.health.ny.gov/county-county-breakdown-positive-cases";
+	var xhttp = new XMLHttpRequest();
+	xhttp.onreadystatechange = function() {
+	    if (this.readyState == 4 && this.status == 200) {
+	        
+	       console.log(xhttp.responseText);
+	    }
+	};
+	xhttp.open("GET",tt, true);
+	xhttp.send();
 }
+
+
+
 getCaseDistribution(); 
 var selectedCountry='';
+//Async / await usage
  
-function getCountryCases(code){
-	var data=null;
 
+getDailyReport();
+
+
+
+/**
+ * Get the country selected from the main map
+ * @param code
+ * @param name
+ * @returns
+ */
+function getCountryCases(code, name){
+	var data=null;
 	for(var temp = 0 ; temp < caseDisribution.records.length-1;temp++){
 		if(caseDisribution.records[temp].countryterritoryCode.toLowerCase().indexOf(code.toLowerCase())==0	){
 			if(data==null){ 
 				data = caseDisribution.records[temp];
 			}
+		}
+	}
+	 
+	var com=0;
+	console.log(countryData);
+	console.log(name);
+	for(var temp1 = 0 ; temp1 < countryData.length-1;temp1++){
+		//console.log(countryData[temp1]);
+		if(countryData[temp1]['Country/Region'].toLowerCase().trim() ===name.toLowerCase().trim()	){
+			 
+				data = countryData[temp1];
+				console.log(data);
+				console.log(getDateString());
+				com=com + new Number(data[ getDateString().replace('2020','20')]);
+		}
+	}
+	console.log(com);
+	var dea=0;
+	for(var temp1 = 0 ; temp1 < dataDeaths.length-1;temp1++){
+		//console.log(countryData[temp1]);
+		if(dataDeaths[temp1]['Country/Region'].toLowerCase().trim() ===name.toLowerCase().trim()	){
+			 
+				data = dataDeaths[temp1];
+				console.log(data);
+				console.log(getDateString());
+				dea=dea + new Number(data[ getDateString().replace('2020','20')]);
+		}
+	}
+	
 
-			var d1 = new Date(data.dateRep);
-			var d2 = new Date(caseDisribution.records[temp].dateRep);
-			if(d1<d2){
-				data = caseDisribution.records[temp];
-			}
-
+	var rec=0;
+	for(var temp1 = 0 ; temp1 < dataRecovered.length-1;temp1++){
+		//console.log(countryData[temp1]);
+		if(dataRecovered[temp1]['Country/Region'].toLowerCase().trim() ===name.toLowerCase().trim()	){
+			 
+				data = dataRecovered[temp1];
+				console.log(data);
+				console.log(getDateString());
+				rec=rec + new Number(data[ getDateString().replace('2020','20')]);
 		}
 	} 
-
-	var cfr =  (((data.deaths!=null?data.deaths:0)/(data.cases!=null?data.cases:0))*100);
-	document.getElementById("info1").innerHTML="<center><i>Date Reported </i><br>"+data.dateRep+'</br>'+
-	"<i>Cases Reported </i><br>"+data.cases+'</br>'+
-	"<i>Deaths Reported </i><br>"+data.deaths+'</br>'+
-	"<i>Population (2018) </i><br>"+data.popData2018+'</br>'+
-	"<i>Total Infection </i><br>"+((data.cases/data.popData2018)*100)+'</br>'+
-	"<i>CFR</i><br>"+(isNaN(cfr)?0:cfr)+'</br></center>';
+	var cfr = (dea/com)*100;
+	cfr =Math.round(cfr * 100) / 100
+	//var cfr =  (((data.deaths!=null?data.deaths:0)/(data.cases!=null?data.cases:0))*100);
+	document.getElementById("info1").innerHTML= 
+	"<center><i>Cases Comfirmed </i>: "+com+'</br>'+
+ 	"<i>Deaths Reported </i>: "+dea+'</br>'+
+ 	"<i>Cases Recovered </i>: "+rec+'</br>'+
+ 	"<i>Regional CFR    </i>: "+cfr+'</br></center>';
+//	"<i>Population (2018) </i>: "+data.popData2018+'</br>'+
+//	"<i>Total Infection </i><br>"+((data.cases/data.popData2018)*100)+'</br>'+
+//	"<i>CFR</i><br>"+(isNaN(cfr)?0:cfr)+'</br></center>';
 }; 
 
 
@@ -255,7 +390,7 @@ var displayFeatureInfo = function(pixel, m) {
 	if (feature) {
 		info.innerHTML = "<center><h3>"+feature.getId() + ': ' + feature.get('name')+"</center></h3>";
 		selectedCountry=feature.getId() ;
-		getCountryCases(selectedCountry);
+		getCountryCases(selectedCountry ,feature.get('name') );
 	} else {
 		info.innerHTML = '&nbsp;';
 	} 
@@ -280,13 +415,65 @@ var displayCountryFeatureInfo = function(pixel, m) {
 	}); 
 	console.log(m); 
 	var info = document.getElementById('info');
-//	if (feature) {
-//	info.innerHTML = "<center><h3>"+feature.getId() + ': ' + feature.get('name')+"</center></h3>";
-//	selectedCountry=feature.getId() ;
-//	getCountryCases(selectedCountry);
-//	} else {
-//	info.innerHTML = '&nbsp;';
-//	} 
+	if (feature) {
+	info2.innerHTML = "<center><h4>"+feature.get('name')+"</center></h4>";
+	selectedCountry=feature.getId() ;
+	//getCountryCases(selectedCountry);
+	console.log(feature);
+	for(var i = 0 ; i< countryData.length-1;i++){
+		var ii = countryData[i]; 
+		//console.log(ii);
+		if( ii['Province/State']===feature.get('name')){
+			console.log(ii[getDateString()]);
+			break;
+		}
+	}
+	var data;
+	for(var temp1 = 0 ; temp1 < countryData.length-1;temp1++){
+		//console.log(countryData[temp1]);
+		if(countryData[temp1]['Province/State'].toLowerCase().trim() ===feature.get('name').toLowerCase().trim()	){
+			 
+				data = countryData[temp1];
+				console.log(data);
+				console.log(getDateString());
+				var com = new Number(data[ getDateString().replace('2020','20')]);
+				info2.innerHTML += "<center><i>Cases Comfirmed : </i>"+com+"</center></i>";
+				break;
+		}
+	}
+	var dea=0;
+	for(var temp1 = 0 ; temp1 < dataDeaths.length-1;temp1++){
+		//console.log(countryData[temp1]);
+		if(dataDeaths[temp1]['Province/State'].toLowerCase().trim() ===feature.get('name').toLowerCase().trim()	){
+			 
+				data = dataDeaths[temp1];
+				console.log(data);
+				console.log(getDateString());
+				dea= new Number(data[ getDateString().replace('2020','20')]);
+				info2.innerHTML += "<center><i>Comfirmed Deaths : </i>"+dea+"</center></i>";
+				break;
+		}
+	}
+
+	var rec=0;
+	for(var temp1 = 0 ; temp1 < dataRecovered.length-1;temp1++){
+		//console.log(countryData[temp1]);
+		if(dataRecovered[temp1]['Province/State'].toLowerCase().trim() ===name.toLowerCase().trim()	){
+			 
+				data = dataRecovered[temp1];
+				console.log(data);
+				console.log(getDateString());
+				rec=rec + new Number(data[ getDateString().replace('2020','20')]);
+				info2.innerHTML += "<center><i>Cases Recovered : </i>"+rec+"</center></i>";
+				break;
+		}
+	} 
+	var cfr = (dea/com)*100;
+	cfr =Math.round(cfr * 100) / 100
+	info2.innerHTML += "<center><i>Regional CFR : </i>"+cfr+"</center></i>";
+	} else {
+	info2.innerHTML = '&nbsp;';
+	} 
 	if (feature !== highlight) {
 		if (highlightCountry) {
 			featureOverlayCountry.getSource().removeFeature(highlightCountry);
@@ -364,6 +551,8 @@ countryMap.on('click', function(evt) {
 	}
 	var pixel = countryMap.getEventPixel(evt.originalEvent) 
 	displayCountryFeatureInfo(evt.pixel,countryMap);
+	
+ 
 });
 
 
