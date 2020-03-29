@@ -122,6 +122,20 @@ function getDailyReport(){
 		});
 	
 	
+var canadaPopDay ;
+	$.getJSON( {
+		url: "https://raw.githubusercontent.com/AliMedicalOpenSource/SARS-CoV-2/master/data/canadaPopulation.json",
+		success: function(data){
+			canadaPopDay=data;
+			console.log(canadaPopDay);
+ 
+		},
+		error: function (e){
+			console.log(e);
+		}
+		});
+	
+	 
 	
 	
 	var tt="https://cors-anywhere.herokuapp.com/https://coronavirus.health.ny.gov/county-county-breakdown-positive-cases";
@@ -166,14 +180,20 @@ function getCountryCases(code, name){
 	var com=0;
 	console.log(countryData);
 	console.log(name);
+	 
 	for(var temp1 = 0 ; temp1 < countryData.length-1;temp1++){
 		//console.log(countryData[temp1]);
-		if(countryData[temp1]['Country/Region'].toLowerCase().trim() ===name.toLowerCase().trim()	){
-			 
-				data = countryData[temp1];
-				console.log(data);
-				console.log(getDateString());
-				com=com + new Number(data[ getDateString().replace('2020','20')]);
+		if(countryData[temp1]['Country/Region'].toLowerCase().trim() ===name.toLowerCase().trim()	){ 
+				data = countryData[temp1];  
+				if(isNaN(com)){ 
+					var day = new Date();
+					day = new Date(day.getYear(), day.getMonth(),day.getDate()-1) ;
+					var r = getDateString(day).replace('2020','20').replace('120','20');
+					com = com + new Number(data[ r.replace('2020','20').replace('120','20')]);
+				}else{
+
+					com=com + new Number(data[ getDateString().replace('2020','20')]);
+				}
 		}
 	}
 	console.log(com);
@@ -182,9 +202,7 @@ function getCountryCases(code, name){
 		//console.log(countryData[temp1]);
 		if(dataDeaths[temp1]['Country/Region'].toLowerCase().trim() ===name.toLowerCase().trim()	){
 			 
-				data = dataDeaths[temp1];
-				console.log(data);
-				console.log(getDateString());
+				data = dataDeaths[temp1]; 
 				dea=dea + new Number(data[ getDateString().replace('2020','20')]);
 		}
 	}
@@ -193,11 +211,8 @@ function getCountryCases(code, name){
 	var rec=0;
 	for(var temp1 = 0 ; temp1 < dataRecovered.length-1;temp1++){
 		//console.log(countryData[temp1]);
-		if(dataRecovered[temp1]['Country/Region'].toLowerCase().trim() ===name.toLowerCase().trim()	){
-			 
-				data = dataRecovered[temp1];
-				console.log(data);
-				console.log(getDateString());
+		if(dataRecovered[temp1]['Country/Region'].toLowerCase().trim() ===name.toLowerCase().trim()	){ 
+				data = dataRecovered[temp1];  
 				rec=rec + new Number(data[ getDateString().replace('2020','20')]);
 		}
 	} 
@@ -431,8 +446,7 @@ var displayCountryFeatureInfo = function(pixel, m) {
 	var data;
 	for(var temp1 = 0 ; temp1 < countryData.length-1;temp1++){
 		//console.log(countryData[temp1]);
-		if(countryData[temp1]['Province/State'].toLowerCase().trim() ===feature.get('name').toLowerCase().trim()	){
-			 
+		if(countryData[temp1]['Province/State'].toLowerCase().trim() ===feature.get('name').toLowerCase().trim()){ 
 				data = countryData[temp1];
 				console.log(data);
 				console.log(getDateString());

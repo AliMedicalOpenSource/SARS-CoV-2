@@ -117,80 +117,7 @@ parcelRequire = (function (modules, cache, entry, globalName) {
   }
 
   return newRequire;
-})({"node_modules/parcel-bundler/src/builtins/bundle-url.js":[function(require,module,exports) {
-var bundleURL = null;
-
-function getBundleURLCached() {
-  if (!bundleURL) {
-    bundleURL = getBundleURL();
-  }
-
-  return bundleURL;
-}
-
-function getBundleURL() {
-  // Attempt to find the URL of the current script and use that as the base URL
-  try {
-    throw new Error();
-  } catch (err) {
-    var matches = ('' + err.stack).match(/(https?|file|ftp|chrome-extension|moz-extension):\/\/[^)\n]+/g);
-
-    if (matches) {
-      return getBaseURL(matches[0]);
-    }
-  }
-
-  return '/';
-}
-
-function getBaseURL(url) {
-  return ('' + url).replace(/^((?:https?|file|ftp|chrome-extension|moz-extension):\/\/.+)\/[^/]+$/, '$1') + '/';
-}
-
-exports.getBundleURL = getBundleURLCached;
-exports.getBaseURL = getBaseURL;
-},{}],"node_modules/parcel-bundler/src/builtins/css-loader.js":[function(require,module,exports) {
-var bundle = require('./bundle-url');
-
-function updateLink(link) {
-  var newLink = link.cloneNode();
-
-  newLink.onload = function () {
-    link.remove();
-  };
-
-  newLink.href = link.href.split('?')[0] + '?' + Date.now();
-  link.parentNode.insertBefore(newLink, link.nextSibling);
-}
-
-var cssTimeout = null;
-
-function reloadCSS() {
-  if (cssTimeout) {
-    return;
-  }
-
-  cssTimeout = setTimeout(function () {
-    var links = document.querySelectorAll('link[rel="stylesheet"]');
-
-    for (var i = 0; i < links.length; i++) {
-      if (bundle.getBaseURL(links[i].href) === bundle.getBundleURL()) {
-        updateLink(links[i]);
-      }
-    }
-
-    cssTimeout = null;
-  }, 50);
-}
-
-module.exports = reloadCSS;
-},{"./bundle-url":"node_modules/parcel-bundler/src/builtins/bundle-url.js"}],"node_modules/ol/ol.css":[function(require,module,exports) {
-
-        var reloadCSS = require('_css_loader');
-        module.hot.dispose(reloadCSS);
-        module.hot.accept(reloadCSS);
-      
-},{"_css_loader":"node_modules/parcel-bundler/src/builtins/css-loader.js"}],"node_modules/ol/util.js":[function(require,module,exports) {
+})({"node_modules/ol/util.js":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -66891,30 +66818,29 @@ module.exports = function (t) {
 },{}],"index.js":[function(require,module,exports) {
 "use strict";
 
-require("ol/ol.css");
-
 var _Map = _interopRequireDefault(require("ol/Map"));
 
-var _View = _interopRequireDefault(require("ol/View"));
+var _View = _interopRequireDefault(require("/node_modules/ol/View"));
 
-var _GeoJSON = _interopRequireDefault(require("ol/format/GeoJSON"));
+var _GeoJSON = _interopRequireDefault(require("/node_modules/ol/format/GeoJSON"));
 
-var _Vector = _interopRequireDefault(require("ol/layer/Vector"));
+var _Vector = _interopRequireDefault(require("/node_modules/ol/layer/Vector"));
 
-var _Vector2 = _interopRequireDefault(require("ol/source/Vector"));
+var _Vector2 = _interopRequireDefault(require("/node_modules/ol/source/Vector"));
 
-var _style2 = require("ol/style");
+var _style2 = require("/node_modules/ol/style");
 
-var _control = require("ol/control");
+var _control = require("/node_modules/ol/control");
 
-var _MousePosition = _interopRequireDefault(require("ol/control/MousePosition"));
+var _MousePosition = _interopRequireDefault(require("/node_modules/ol/control/MousePosition"));
 
-var _coordinate = require("ol/coordinate");
+var _coordinate = require("/node_modules/ol/coordinate");
 
-var _jquery = _interopRequireDefault(require("jquery"));
+var _jquery = _interopRequireDefault(require("/node_modules/jquery"));
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
+//import '/ol/ol.css';
 var csvFilePath = '<path to csv file>';
 
 var csv = require('csvtojson');
@@ -67002,6 +66928,19 @@ function getDailyReport() {
     console.log(dataDeaths);
   });
 
+  var canadaPopDay;
+
+  _jquery.default.getJSON({
+    url: "https://raw.githubusercontent.com/AliMedicalOpenSource/SARS-CoV-2/master/data/canadaPopulation.json",
+    success: function success(data) {
+      canadaPopDay = data;
+      console.log(canadaPopDay);
+    },
+    error: function error(e) {
+      console.log(e);
+    }
+  });
+
   var tt = "https://cors-anywhere.herokuapp.com/https://coronavirus.health.ny.gov/county-county-breakdown-positive-cases";
   var xhttp = new XMLHttpRequest();
 
@@ -67045,9 +66984,15 @@ function getCountryCases(code, name) {
     //console.log(countryData[temp1]);
     if (countryData[temp1]['Country/Region'].toLowerCase().trim() === name.toLowerCase().trim()) {
       data = countryData[temp1];
-      console.log(data);
-      console.log(getDateString());
-      com = com + new Number(data[getDateString().replace('2020', '20')]);
+
+      if (isNaN(com)) {
+        var day = new Date();
+        day = new Date(day.getYear(), day.getMonth(), day.getDate() - 1);
+        var r = getDateString(day).replace('2020', '20').replace('120', '20');
+        com = com + new Number(data[r.replace('2020', '20').replace('120', '20')]);
+      } else {
+        com = com + new Number(data[getDateString().replace('2020', '20')]);
+      }
     }
   }
 
@@ -67058,8 +67003,6 @@ function getCountryCases(code, name) {
     //console.log(countryData[temp1]);
     if (dataDeaths[temp1]['Country/Region'].toLowerCase().trim() === name.toLowerCase().trim()) {
       data = dataDeaths[temp1];
-      console.log(data);
-      console.log(getDateString());
       dea = dea + new Number(data[getDateString().replace('2020', '20')]);
     }
   }
@@ -67070,8 +67013,6 @@ function getCountryCases(code, name) {
     //console.log(countryData[temp1]);
     if (dataRecovered[temp1]['Country/Region'].toLowerCase().trim() === name.toLowerCase().trim()) {
       data = dataRecovered[temp1];
-      console.log(data);
-      console.log(getDateString());
       rec = rec + new Number(data[getDateString().replace('2020', '20')]);
     }
   }
@@ -67399,7 +67340,7 @@ countryMap.on('click', function (evt) {
   var pixel = countryMap.getEventPixel(evt.originalEvent);
   displayCountryFeatureInfo(evt.pixel, countryMap);
 });
-},{"ol/ol.css":"node_modules/ol/ol.css","ol/Map":"node_modules/ol/Map.js","ol/View":"node_modules/ol/View.js","ol/format/GeoJSON":"node_modules/ol/format/GeoJSON.js","ol/layer/Vector":"node_modules/ol/layer/Vector.js","ol/source/Vector":"node_modules/ol/source/Vector.js","ol/style":"node_modules/ol/style.js","ol/control":"node_modules/ol/control.js","ol/control/MousePosition":"node_modules/ol/control/MousePosition.js","ol/coordinate":"node_modules/ol/coordinate.js","jquery":"node_modules/jquery/dist/jquery.js","csvtojson":"node_modules/csvtojson/browser/browser.js"}],"node_modules/parcel-bundler/src/builtins/hmr-runtime.js":[function(require,module,exports) {
+},{"ol/Map":"node_modules/ol/Map.js","/node_modules/ol/View":"node_modules/ol/View.js","/node_modules/ol/format/GeoJSON":"node_modules/ol/format/GeoJSON.js","/node_modules/ol/layer/Vector":"node_modules/ol/layer/Vector.js","/node_modules/ol/source/Vector":"node_modules/ol/source/Vector.js","/node_modules/ol/style":"node_modules/ol/style.js","/node_modules/ol/control":"node_modules/ol/control.js","/node_modules/ol/control/MousePosition":"node_modules/ol/control/MousePosition.js","/node_modules/ol/coordinate":"node_modules/ol/coordinate.js","/node_modules/jquery":"node_modules/jquery/dist/jquery.js","csvtojson":"node_modules/csvtojson/browser/browser.js"}],"node_modules/parcel-bundler/src/builtins/hmr-runtime.js":[function(require,module,exports) {
 var global = arguments[3];
 var OVERLAY_ID = '__parcel__error__overlay__';
 var OldModule = module.bundle.Module;
@@ -67427,7 +67368,7 @@ var parent = module.bundle.parent;
 if ((!parent || !parent.isParcelRequire) && typeof WebSocket !== 'undefined') {
   var hostname = "" || location.hostname;
   var protocol = location.protocol === 'https:' ? 'wss' : 'ws';
-  var ws = new WebSocket(protocol + '://' + hostname + ':' + "64936" + '/');
+  var ws = new WebSocket(protocol + '://' + hostname + ':' + "53616" + '/');
 
   ws.onmessage = function (event) {
     checkedAssets = {};
