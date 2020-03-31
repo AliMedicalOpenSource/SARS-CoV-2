@@ -66926,6 +66926,7 @@ var url_distribution = "https://cors-anywhere.herokuapp.com/http://opendata.ecdc
 var url_distribution1 = "https://github.com/CSSEGISandData/COVID-19/blob/master/csse_covid_19_data/csse_covid_19_daily_reports/03-27-2020.csv";
 var url_us = "https://cdn.jsdelivr.net/npm/us-atlas@3/states-10m.json";
 var url_mexico = "https://raw.githubusercontent.com/aaronali/click_that_hood/master/public/data/mexico.geojson";
+var url_usDataSheet = 'https://raw.githubusercontent.com/AliMedicalOpenSource/SARS-CoV-2/master/data/us-covid-datashhet';
 var countryData = [];
 var caseDisribution;
 var dataRecovered = [];
@@ -67472,7 +67473,7 @@ countryMap.on('click', function (evt) {
 var usCDCData;
 
 function getUSAStatsFromCDC() {
-  var rr = 'https://www.cdc.gov/coronavirus/2019-ncov/cases-updates/cases-in-us.html#2019coronavirus-summary';
+  var rr = 'http://localhost:3000/api/getUSAStatsFromCDC/District%20of%20Columbia';
   loadWholePage(rr);
   (0, _jquery.default)(function ($) {
     $('#info').load(rr);
@@ -67480,18 +67481,6 @@ function getUSAStatsFromCDC() {
     $('#info').load(document.getElementById('2019coronavirus-summary'));
   });
 }
-
-getUSAStatsFromCDC();
-/**
-	responseHTML
-	(c) 2007-2008 xul.fr		
-	Licence Mozilla 1.1
-*/
-
-/**
-	Searches for body, extracts and return the content
-	New version contributed by users
-*/
 
 function getBody(content) {
   test = content.toLowerCase(); // to eliminate case sensitivity
@@ -67597,7 +67586,7 @@ var parent = module.bundle.parent;
 if ((!parent || !parent.isParcelRequire) && typeof WebSocket !== 'undefined') {
   var hostname = "" || location.hostname;
   var protocol = location.protocol === 'https:' ? 'wss' : 'ws';
-  var ws = new WebSocket(protocol + '://' + hostname + ':' + "60690" + '/');
+  var ws = new WebSocket(protocol + '://' + hostname + ':' + "61230" + '/');
 
   ws.onmessage = function (event) {
     checkedAssets = {};

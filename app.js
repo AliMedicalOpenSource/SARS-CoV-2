@@ -17,7 +17,7 @@ const port1 = 8080;
 var url_casesComfirmed='https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/csse_covid_19_time_series/time_series_covid19_confirmed_global.csv';
 var url_casesRecovered='https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/csse_covid_19_time_series/time_series_covid19_recovered_global.csv';
 var url_casesDeaths="https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/csse_covid_19_time_series/time_series_covid19_deaths_global.csv";
-
+var url_usDataSheet="https://raw.githubusercontent.com/AliMedicalOpenSource/SARS-CoV-2/master/data/us-covid-datashhet";
 
 //Create HTTP server and listen on port 3000 for api requests
 const server = http.createServer((req, res) => {
@@ -26,12 +26,16 @@ const server = http.createServer((req, res) => {
 	res.statusCode = 200;
 	res.setHeader('Content-Type', 'application/json'); 
 	res.setHeader("Access-Control-Allow-Origin", " http://127.0.0.1:8080");
-	res.setHeader("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
-	var data  =getApiData(req); 
+	res.setHeader("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept"); 
 	var response={};
+	try{ 
+	var data  =getApiData(req);
 	response["status"]=200;
-	response.data=data;
-	console.log(data)
+	response.data=data; 
+	}catch(e){
+		console.log(e); 
+		response["status"]=400;;
+	}
 	res.end( JSON.stringify(response));
 });
 
@@ -87,14 +91,20 @@ function getCSVJsonArray(url, cb, cbf){
 		.subscribe((jsonObj)=>
 		{ 
 			cb(jsonObj);
-		});  
+			if(url  == url_usDataSheet){
+				getUSData();
+			}
+		}); 
+		 
 	})
 	 
+
 }
 var casesComfirmed=[];
 var casesRecovered=[];
 var casesDeaths=[];
-var csse_covid_19_daily_reports=[];
+var csse_covid_19_daily_reports=[]; 
+
 /**
  * Set comfirmed cases from covid data set
  * @param data
@@ -140,13 +150,19 @@ function loadcsseCovid19DailyReports(date){
 		console.log(data);
 		date.setTime(date.getTime()-(86400000  )); 
 		loadcsseCovid19DailyReports(date);
-	  });
+	});
 } 
+
+var cases_usDataSheet=[];
+function loadUSDataSheet(data){
+	cases_usDataSheet.push( data); 
+}
 var temp=new Date();
 loadcsseCovid19DailyReports(temp);  
 getCSVJsonArray(url_casesComfirmed, loadCasesComfirmed, console.log);
 getCSVJsonArray(url_casesRecovered, loadCasesRecovered, console.log);
 getCSVJsonArray(url_casesDeaths, loadCasesDeaths, console.log);
+getCSVJsonArray(url_usDataSheet, loadUSDataSheet, console.log);
 
 /**** API CALLS *****/
 function getApiData(req){ 
@@ -168,17 +184,23 @@ function getApiData(req){
 			if(req.url.split("/").length>1){
 				return getUSAStatsFromCDC(req.url.replace("getUSAStatsFromCDC/",'')) 
 			}
-			return usCDCData; ;
+			return usCDCData;  
 		case "csse_covid_19_daily_reports": 
 			if(req.url.split("/").length===1){ 
 				return csse_covid_19_daily_reports; 
 			}else{
 				return getcsse_covid_19_daily_reports(req);
 			}
+		case "getSmartData":
+			console.log(":::");
+			if(req.url.split("/").length>1){
+				return getSmartData(req.url.replace("getSmartData/",'')) 
+			}
+			return cases_usDataSheet;   
 		} 
 
 
-		 
+
 	}else{
 		return null;
 
@@ -204,8 +226,8 @@ function getcsse_covid_19_daily_reports(req){
 				res1.push(data);
 			}
 			console.log(caseType);
-			 
-			  
+
+
 		});
 		return res1;
 	}
@@ -311,8 +333,7 @@ function time_series_covid19_recovered_global(country){
 				x+=new Number(data);
 			}
 		}
-	})
-	console.log(x);
+	}) 
 	var xx={};
 	xx['cases']=x
 	return xx;
@@ -327,13 +348,13 @@ var nassaucountyny=0;
  * @returns
  */
 //var yu='    Ardsley 9 Bedford 16 Briarcliff Manor 9 Bronxville 16 Buchanan 0 Cortlandt 48 Croton-on-Hudson 7 Dobbs Ferry 30 Eastchester 55 Elmsford 8 Greenburgh 81 Harrison 38 Hastings-on-Hudson 13 Irvington 10 Larchmont 15 Lewisboro 15 Mamaroneck Town 22 Mamaroneck Village 19 Mount Kisco 34 Mount Pleasant 49 Mount Vernon 136 New Castle 23 New Rochelle 284 North Castle 20 North Salem 3 Ossining Town 12 Ossining Village 81 Peekskill 41 Pelham 21 Pelham Manor 20 Pleasantville 19 Port Chester 82 Pound Ridge 2 Rye Brook 24 Rye City 22 Scarsdale 45 Sleepy Hollow 24 Somers 16 Tarrytown 22 Tuckahoe 9 White Plains 98 Yonkers 301 Yorktown 55';
-//    yu = yu.split(' ');
-// for(var rt=0;rt<yu.length;rt++){
-//	 if(!isNaN(yu[rt])){
-//		 nassaucountyny+=new Number(yu[rt]);
-//		 console.log('rt='+nassaucountyny);
-//	 }
-// }
+//yu = yu.split(' ');
+//for(var rt=0;rt<yu.length;rt++){
+//if(!isNaN(yu[rt])){
+//nassaucountyny+=new Number(yu[rt]);
+//console.log('rt='+nassaucountyny);
+//}
+//}
 
 
 /**
@@ -342,23 +363,23 @@ var nassaucountyny=0;
  * @returns
  */
 function loadCDCData(){ 
-$.get('https://www.cdc.gov/coronavirus/2019-ncov/map-cases-us.json', function( data ) {
-	$( ".result" ).html( data ); 
- 
-	  data['data'].forEach(function (item){
-		 if(item.Jurisdiction!=undefined){ 
-		  usCDCData[item.Jurisdiction]=item;
-		 }else{
-			 
-		 }
-	  });
-	  
+	$.get('https://www.cdc.gov/coronavirus/2019-ncov/map-cases-us.json', function( data ) {
+		$( ".result" ).html( data ); 
+
+		data['data'].forEach(function (item){
+			if(item.Jurisdiction!=undefined){ 
+				usCDCData[item.Jurisdiction]=item;
+			}else{
+
+			}
+		});
+
 	}); 
-lastUpdatedCDC= new Date();
+	lastUpdatedCDC= new Date();
 }
 
 function getUSAStatsFromCDC(state){
-	state =  state.split('%20').join(' ').repplace(' Of ',' of ');
+	state =  state.split('%20').join(' ').replace(' Of ',' of ');
 	console.log(state); 
 	if(usCDCData[state]!=undefined){
 		return usCDCData[state.replace('%20',' ')]; 
@@ -367,17 +388,82 @@ function getUSAStatsFromCDC(state){
 	}
 }
 
+function combineUSData(datafromDataSheet, cdcData){
+	if(casesSmartSet['United States of America']==undefined){
+		casesSmartSet['United States of America']={};
+	}
+
+	if(casesSmartSet['United States of America'][cdcData.Jurisdiction]==undefined){
+		casesSmartSet['United States of America'][cdcData.Jurisdiction]={};
+	}
+	var r =datafromDataSheet;
+	var data={}
+	data.FIPS ='';
+	data.Admin2 =  "";
+	data.Province_State=cdcData.Jurisdiction
+	data.Country_Region='United States of America'; 
+	data.Last_Update='';
+	data.Lat= '';
+	data.Long='';
+	data.Confirmed=cdcData['Cases Reported'];
+	data.Deaths=r.Deaths;
+	data.Recovered=r.Recovered;
+	data.Active='';
+	data.Combined_Key= data.Country_Region+' '+ cdcData.Jurisdiction;
+	data.tested=r.tested;
+	
+	casesSmartSet['United States of America'][cdcData.Jurisdiction]=data;
+	
+}
+
+var casesSmartSet={};
+
+function getUSData(county){
+	console.log(cases_usDataSheet);
+
+	cases_usDataSheet.forEach(function (item){
+		console.log(item);
+	});
+	 
+} 
+
+function getSmartData(region){
+	var data;
+	while(region.indexOf('%20')>0){region=region.replace('%20',' ');}
+	var lookingForCountry;
+	var lookingForProvince;
+	if(region.indexOf('/')>0){
+		lookingForCountry=region.split('/')[0].trim();
+		lookingForCountry=region.split('/')[1].trim();
+	}else{
+		lookingForCountry=region.trim().toLowerCase() ;
+	}
+	var regionData 
+	cases_usDataSheet.forEach(function (country){
+		if( country['Country_Region']!=undefined &&(country['Country_Region'].toLowerCase().trim()==lookingForCountry)){ 
+			if(lookingForProvince!=undefined){
+				cases_usDataSheet.forEach(function (province){
+					if(provice.Province_State ==lookingForProvince){
+						data = province;
+					}
+				} )
+				
+			}else{
+				console.log(country);
+				if(country['Province_State'].trim()==''){ 
+					data = country;
+				}
+			}
+			
+		}
+	}); 
+	console.log(data);
+	return data; 
+}
 
 
 
 
-
-
-
-
-
-
-
-// init and updateDate variables
+//init and updateDate variables
 var  lastUpdatedCDC=new Date();
 loadCDCData();

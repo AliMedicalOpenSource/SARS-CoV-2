@@ -1,5 +1,5 @@
 FIPS , Admin2 , Province_State,Country_Region ,Last_Update ,Confirmed,Deaths ,Recovered ,Active ,tested,Combined_Key,Source,under18, under50, over50,0-9,10-19,20-29,30-39,40-49,50-59,60-69,70-79,80+, f,m,u, hospitalization, icu
-,,,United States of America ,2020-03-30,,2112122653, , , ,United States of America ,[]
+,,,United States of America ,2020-03-30,140904,2405, , ,133444,United States of America USA US,,,,,,,,,,,,,,,,,
 ,,Washington,United States of America,2020-03-30,4896,195,,,65362,United States of America  Washington WA,https://www.doh.wa.gov/Emergencies/Coronavirus,81,2693,2122,,,,,,,,,,2497,2203,196,
 ,,Oregon,United States of America,2020-03-30,548,13,13,,11426,United States of America  Oregon OR,https://govstatus.egov.com/OR-OHA-COVID-19,,,,,,,,,,,,,,,,,
 ,,Idaho,United States of America,2020-03-30,310 ,6,13,,,United States of America  Idaho ID,https://coronavirus.idaho.gov/,3,157,149,,,,,,,,,,165,144,1,39,

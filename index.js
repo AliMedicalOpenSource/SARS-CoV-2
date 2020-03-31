@@ -23,6 +23,11 @@ var url_distribution1="https://github.com/CSSEGISandData/COVID-19/blob/master/cs
 
 var url_us =	"https://cdn.jsdelivr.net/npm/us-atlas@3/states-10m.json";
 var url_mexico ="https://raw.githubusercontent.com/aaronali/click_that_hood/master/public/data/mexico.geojson";
+ 
+	var url_usDataSheet = 'https://raw.githubusercontent.com/AliMedicalOpenSource/SARS-CoV-2/master/data/us-covid-datashhet';
+ 
+
+
 var countryData=[];
 var caseDisribution; 
 
@@ -626,10 +631,9 @@ countryMap.on('click', function(evt) {
 
 
 
-
 var usCDCData;
 function getUSAStatsFromCDC(){
-	var rr = 'https://www.cdc.gov/coronavirus/2019-ncov/cases-updates/cases-in-us.html#2019coronavirus-summary';
+	var rr = 'http://localhost:3000/api/getUSAStatsFromCDC/District%20of%20Columbia'
 
 	loadWholePage(rr);
 	$(function($){
@@ -638,23 +642,12 @@ function getUSAStatsFromCDC(){
 		$('#info').load(document.getElementById('2019coronavirus-summary'))
 	});
 	
-}
-getUSAStatsFromCDC();
+} 
+
+ 
 
 
-
-/**
-	responseHTML
-	(c) 2007-2008 xul.fr		
-	Licence Mozilla 1.1
-*/	
-
-
-/**
-	Searches for body, extracts and return the content
-	New version contributed by users
-*/
-
+ 
 
 function getBody(content) 
 {
