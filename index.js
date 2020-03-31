@@ -12,7 +12,7 @@ import $ from "jquery";
 const csvFilePath='<path to csv file>';
 const csv=require('csvtojson');
 
- 
+
 var url_casesComfirmed='https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/csse_covid_19_time_series/time_series_covid19_confirmed_global.csv';
 var url_casesRecovered='https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/csse_covid_19_time_series/time_series_covid19_recovered_global.csv';
 var url_casesDeaths="https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/csse_covid_19_time_series/time_series_covid19_deaths_global.csv";
@@ -23,9 +23,9 @@ var url_distribution1="https://github.com/CSSEGISandData/COVID-19/blob/master/cs
 
 var url_us =	"https://cdn.jsdelivr.net/npm/us-atlas@3/states-10m.json";
 var url_mexico ="https://raw.githubusercontent.com/aaronali/click_that_hood/master/public/data/mexico.geojson";
- 
-	var url_usDataSheet = 'https://raw.githubusercontent.com/AliMedicalOpenSource/SARS-CoV-2/master/data/us-covid-datashhet';
- 
+
+var url_usDataSheet = 'https://raw.githubusercontent.com/AliMedicalOpenSource/SARS-CoV-2/master/data/us-covid-datashhet';
+
 
 
 var countryData=[];
@@ -47,19 +47,19 @@ function getDateString(d){
 
 
 
-function getCaseDistribution( ) {
-	$.getJSON({
-		url: url_distribution,
-		success: function(data){
-			caseDisribution=data;
-			console.log(data);
+//function getCaseDistribution( ) {
+//$.getJSON({
+//url: url_distribution,
+//success: function(data){
+//caseDisribution=data;
+//console.log(data);
 
-		},
-		error: function (e){
-			console.log(e);
-		}
-	})
-}    
+//},
+//error: function (e){
+//console.log(e);
+//}
+//})
+//}    
 var caseDataMaster="https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/csse_covid_19_daily_reports/";
 function getDailyReport(){
 //	var d = new Date();
@@ -142,10 +142,10 @@ function getDailyReport(){
 //	var tt="https://cors-anywhere.herokuapp.com/https://coronavirus.health.ny.gov/county-county-breakdown-positive-cases";
 //	var xhttp = new XMLHttpRequest();
 //	xhttp.onreadystatechange = function() {
-//		if (this.readyState == 4 && this.status == 200) {
-//
-//			console.log(xhttp.responseText);
-//		}
+//	if (this.readyState == 4 && this.status == 200) {
+
+//	console.log(xhttp.responseText);
+//	}
 //	};
 //	xhttp.open("GET",tt, true);
 //	xhttp.send();
@@ -153,13 +153,14 @@ function getDailyReport(){
 
 
 
-getCaseDistribution(); 
+//getCaseDistribution(); 
 var selectedCountry='';
+var selectedCountryName='';
 //Async / await usage
 
 
 getDailyReport();
- 
+
 
 function calculate(){
 	var dr;
@@ -172,8 +173,13 @@ function calculate(){
 			if(!isNaN( document.getElementById('cc').innerHTML)){
 				var cc=  document.getElementById('cc').innerHTML;
 				var cfr = (new Number(dr)/new Number(cc))*100;
-				cfr =Math.round(cfr * 100) / 100 
-				document.getElementById('cfr').innerHTML=  cfr;
+				cfr =Math.round(cfr * 100) / 100 ;
+				if(!isNaN(cfr)){ 
+					document.getElementById('cfr').innerHTML=  cfr;
+				}else{
+
+					document.getElementById('cfr').innerHTML=  0;
+				}
 			}
 		}
 	}
@@ -184,22 +190,24 @@ function calculate(){
  * @param name
  * @returns
  */
-function getCountryCases(code, name){
-	
-	document.getElementById("info1").innerHTML= "<span >"+
-		"<center><i>Cases Comfirmed </i>: <span id='cc'>n/a</span><br>"+
-		"<i>Deaths Reported </i>: <span id='dr'>n/a</span></br>"+
-		"<i>Cases Recovered </i>: <span id='cr'>n/a</span></br>"+
-		"<i>Regional CFR    </i>: <span id='cfr'>n/a</span></br></center></span>";
-	document.getElementById("info1").onchange = function(e){
-		console.log('change');
+function getCountryCases(code, name){ 
+	document.getElementById("info1").innerHTML+= "<span >"+
+	"<center><i>Cases Comfirmed </i>: <span id='cc'>n/a</span><br>"+
+	"<i>Deaths Reported </i>: <span id='dr'>n/a</span></br>"+
+	"<i>Cases Recovered </i>: <span id='cr'>n/a</span></br>"+
+	"<i>Regional CFR    </i>: <span id='cfr'>n/a</span></br></center></span>"; 
+	var smart=false;
+	var url1 ="http://127.0.0.1:3000/api/time_series_covid19_recovered_global/";
+	if(name.toLowerCase().trim()=='united states of america'){
+		url1 ="http://127.0.0.1:3000/api/getSmartData/";
+		smart=true;
 	}
-	
+
 	$.getJSON( {
-		url: "http://127.0.0.1:3000/api/time_series_covid19_recovered_global/"+name.toLowerCase(),
+		url: url1+name.toLowerCase(),
 		success: function(data){   
 			var i = data.data;
-			document.getElementById("cr").innerHTML=i.cases ;
+			document.getElementById("cr").innerHTML=(!smart)?i.cases:i.Recovered ;
 			calculate();
 		},
 		error: function (e){
@@ -207,90 +215,38 @@ function getCountryCases(code, name){
 		}
 	});
 
+	var url4 ="http://127.0.0.1:3000/api/time_series_covid19_confirmed_global/";
+	if(name.toLowerCase().trim()=='united states of america'){
+		url4 ="http://127.0.0.1:3000/api/getSmartData/";
+	}
 	$.getJSON( {
-		url: "http://127.0.0.1:3000/api/time_series_covid19_confirmed_global/"+name.toLowerCase(),
+		url: url4+name.toLowerCase(),
 		success: function(data){   
 			var i = data.data;
-			document.getElementById("cc").innerHTML=i.cases ;
+			document.getElementById("cc").innerHTML=(!smart)?i.cases:i.Confirmed;
 			calculate();
 		},
 		error: function (e){
 			console.log(e);
 		}
 	});
+
+	var url3 ="http://127.0.0.1:3000/api/time_series_covid19_deaths_global/";
+	if(name.toLowerCase().trim()=='united states of america'){
+		url3 ="http://127.0.0.1:3000/api/getSmartData/";
+	}
 	$.getJSON( {
-		url: "http://127.0.0.1:3000/api/time_series_covid19_deaths_global/"+name.toLowerCase(),
+		url:url3+name.toLowerCase(),
 		success: function(data){   
 			var i = data.data;
-			document.getElementById("dr").innerHTML=i.cases ;
+			document.getElementById("dr").innerHTML=(!smart)?i.cases:i.Deaths ;
 			calculate(); 
 		},
 		error: function (e){
 			console.log(e);
 		}
-	});
+	}); 
 
-
-
-	var data=null;
-//	for(var temp = 0 ; temp < caseDisribution.records.length-1;temp++){
-//		if(caseDisribution.records[temp].countryterritoryCode.toLowerCase().indexOf(code.toLowerCase())==0	){
-//			if(data==null){ 
-//				data = caseDisribution.records[temp];
-//			}
-//		}
-//	}
-
-	var com=0;
-	console.log(countryData);
-	console.log(name);
-
-	for(var temp1 = 0 ; temp1 < countryData.length-1;temp1++){
-		//console.log(countryData[temp1]);
-		if(countryData[temp1]['Country/Region'].toLowerCase().trim() ===name.toLowerCase().trim()	){ 
-			data = countryData[temp1];  
-			if(isNaN(com)){ 
-				var day = new Date();
-				day = new Date(day.getYear(), day.getMonth(),day.getDate()-1) ;
-				var r = getDateString(day).replace('2020','20').replace('120','20');
-				com = com + new Number(data[ r.replace('2020','20').replace('120','20')]);
-			}else{
-
-				com=com + new Number(data[ getDateString().replace('2020','20')]);
-			}
-		}
-	}
-	console.log(com);
-	var dea=0;
-	for(var temp1 = 0 ; temp1 < dataDeaths.length-1;temp1++){
-		//console.log(countryData[temp1]);
-		if(dataDeaths[temp1]['Country/Region'].toLowerCase().trim() ===name.toLowerCase().trim()	){
-
-			data = dataDeaths[temp1]; 
-			dea=dea + new Number(data[ getDateString().replace('2020','20')]);
-		}
-	}
-
-
-	var rec=0;
-	for(var temp1 = 0 ; temp1 < dataRecovered.length-1;temp1++){
-		//console.log(countryData[temp1]);
-		if(dataRecovered[temp1]['Country/Region'].toLowerCase().trim() ===name.toLowerCase().trim()	){ 
-			data = dataRecovered[temp1];  
-			rec=rec + new Number(data[ getDateString().replace('2020','20')]);
-		}
-	} 
-	var cfr = (dea/com)*100;
-	cfr =Math.round(cfr * 100) / 100
-	//var cfr =  (((data.deaths!=null?data.deaths:0)/(data.cases!=null?data.cases:0))*100);
-//	document.getElementById("info1").innerHTML= 
-//		"<center><i>Cases Comfirmed </i>: "+com+'</br>'+
-//		"<i>Deaths Reported </i>: "+dea+'</br>'+
-//		"<i>Cases Recovered </i>: "+rec+'</br>'+
-//		"<i>Regional CFR    </i>: "+cfr+'</br></center>';
-//	"<i>Population (2018) </i>: "+data.popData2018+'</br>'+
-//	"<i>Total Infection </i><br>"+((data.cases/data.popData2018)*100)+'</br>'+
-//	"<i>CFR</i><br>"+(isNaN(cfr)?0:cfr)+'</br></center>';
 }; 
 
 
@@ -458,19 +414,34 @@ var featureOverlayCountry = new VectorLayer({
 
 var highlight;
 var highlightCountry;
-
-
+/**
+ * 
+ * @returns
+ */
+function clearInfo(){
+	document.getElementById('info1').innerHTML='';
+	document.getElementById('info').innerHTML='';
+	document.getElementById('info2').innerHTML='';
+}
+/**
+ * 
+ */
 var displayFeatureInfo = function(pixel, m) { 
 	var feature = m.forEachFeatureAtPixel(pixel, function(feature) {
 		return feature;
 	});  
+
 	var info = document.getElementById('info');
-	if (feature) {
+	if (feature) { 
+		document.getElementById('info1').innerHTML='';
+		document.getElementById('info').innerHTML='';
+		document.getElementById('info2').innerHTML='';
 		info.innerHTML = "<center><h3>"+feature.getId() + ': ' + feature.get('name')+"</center></h3>";
 		selectedCountry=feature.getId() ;
+		selectedCountryName=feature.get('name');
 		getCountryCases(selectedCountry ,feature.get('name') );
 	} else {
-		//info.innerHTML = '&nbsp;';
+		// info.innerHTML = '&nbsp;';
 	} 
 	if (feature !== highlight) {
 		if (highlight) {
@@ -482,72 +453,81 @@ var displayFeatureInfo = function(pixel, m) {
 		highlight = feature;
 	} 
 };
+var selectedProvice;
 /**
  * Display country specific  info 
  * 
  */
-var displayCountryFeatureInfo = function(pixel, m) { 
+var displayProvinceFeature = function(pixel, m) { 
 	console.log(m);
 	var feature = m.forEachFeatureAtPixel(pixel, function(feature) {
 		return feature;
-	}); 
-	console.log(m); 
-	var info = document.getElementById('info');
+	});  
+ 
 	if (feature) {
 		info2.innerHTML = "<center><h4>"+feature.get('name')+"</center></h4>";
-		selectedCountry=feature.getId() ;
-		//getCountryCases(selectedCountry);
-		console.log(feature);
-		for(var i = 0 ; i< countryData.length-1;i++){
-			var ii = countryData[i]; 
-			//console.log(ii);
-			if( ii['Province/State']===feature.get('name')){
-				console.log(ii[getDateString()]);
-				break;
-			}
-		}
-		var data;
-		for(var temp1 = 0 ; temp1 < countryData.length-1;temp1++){
-			//console.log(countryData[temp1]);
-			if(countryData[temp1]['Province/State'].toLowerCase().trim() ===feature.get('name').toLowerCase().trim()){ 
-				data = countryData[temp1];
-				console.log(data);
-				console.log(getDateString());
-				var com = new Number(data[ getDateString().replace('2020','20')]);
-				info2.innerHTML += "<center><i>Cases Comfirmed : </i>"+com+"</center></i>";
-				break;
-			}
-		}
-		var dea=0;
-		for(var temp1 = 0 ; temp1 < dataDeaths.length-1;temp1++){
-			//console.log(countryData[temp1]);
-			if(dataDeaths[temp1]['Province/State'].toLowerCase().trim() ===feature.get('name').toLowerCase().trim()	){
 
-				data = dataDeaths[temp1];
-				console.log(data);
-				console.log(getDateString());
-				dea= new Number(data[ getDateString().replace('2020','20')]);
-				info2.innerHTML += "<center><i>Comfirmed Deaths : </i>"+dea+"</center></i>";
-				break;
-			}
+	var name =selectedCountryName+"/"+feature.get('name');	
+		
+		document.getElementById("info2").innerHTML+= "<span >"+
+		"<center><i>Cases Comfirmed </i>: <span id='cc1'>n/a</span><br>"+
+		"<i>Deaths Reported </i>: <span id='dr1'>n/a</span></br>"+
+		"<i>Cases Recovered </i>: <span id='cr1'>n/a</span></br>"+
+		"<i>Regional CFR    </i>: <span id='cfr1'>n/a</span></br></center></span>"; 
+	var smart=false;
+	var url1 ="http://127.0.0.1:3000/api/time_series_covid19_recovered_global/";
+	if(name.toLowerCase().trim()=='united states of america'){
+		url1 ="http://127.0.0.1:3000/api/getSmartData/";
+		smart=true;
+	}
+	
+	$.getJSON( {
+		url: url1+name.toLowerCase(),
+		success: function(data){   
+			var i = data.data;
+			document.getElementById("cr1").innerHTML=(!smart)?i.cases:i.Recovered ;
+			console.log(this);
+			calculateProvince();
+		},
+		error: function (e){
+			console.log(e);
 		}
+	});
+		
+	var url4 ="http://127.0.0.1:3000/api/time_series_covid19_confirmed_global/";
+	if(name.toLowerCase().trim()=='united states of america'){
+		url4 ="http://127.0.0.1:3000/api/getSmartData/";
+	}
+	$.getJSON( {
+		url: url4+name.toLowerCase(),
+		success: function(data){   
+			var i = data.data;
+			document.getElementById("cc1").innerHTML=(!smart)?i.cases:i.Confirmed;
+			calculateProvince();
+		},
+		error: function (e){
+			console.log(e);
+		}
+	});
 
-		var rec=0;
-		for(var temp1 = 0 ; temp1 < dataRecovered.length-1;temp1++){
-			//console.log(countryData[temp1]);
-			if(dataRecovered[temp1]['Province/State'].toLowerCase().trim() ===name.toLowerCase().trim()	){
+	var url3 ="http://127.0.0.1:3000/api/time_series_covid19_deaths_global/";
+	if(name.toLowerCase().trim()=='united states of america'){
+		url3 ="http://127.0.0.1:3000/api/getSmartData/";
+	}
+	$.getJSON( {
+		url:url3+name.toLowerCase(),
+		success: function(data){   
+			var i = data.data;
+			document.getElementById("dr1").innerHTML=(!smart)?i.cases:i.Deaths ;
+			calculateProvince(); 
+		},
+		error: function (e){
+			console.log(e);
+		}
+	});
 
-				data = dataRecovered[temp1];
-				console.log(data);
-				console.log(getDateString());
-				rec=rec + new Number(data[ getDateString().replace('2020','20')]);
-				info2.innerHTML += "<center><i>Cases Recovered : </i>"+rec+"</center></i>";
-				break;
-			}
-		} 
-		var cfr = (dea/com)*100;
-		cfr =Math.round(cfr * 100) / 100
-		info2.innerHTML += "<center><i>Regional CFR : </i>"+cfr+"</center></i>";
+
+		 
 	} else {
 		info2.innerHTML = '&nbsp;';
 	} 
@@ -624,7 +604,7 @@ countryMap.on('click', function(evt) {
 		return;
 	}
 	var pixel = countryMap.getEventPixel(evt.originalEvent) 
-	displayCountryFeatureInfo(evt.pixel,countryMap);
+	displayProvinceFeature(evt.pixel,countryMap);
 
 
 });
@@ -635,34 +615,34 @@ var usCDCData;
 function getUSAStatsFromCDC(){
 	var rr = 'http://localhost:3000/api/getUSAStatsFromCDC/District%20of%20Columbia'
 
-	loadWholePage(rr);
+		loadWholePage(rr);
 	$(function($){
 		$('#info').load(rr); 
 		console.log(document.getElementById('2019coronavirus-summary'));
 		$('#info').load(document.getElementById('2019coronavirus-summary'))
 	});
-	
+
 } 
 
- 
 
 
- 
+
+
 
 function getBody(content) 
 {
-   test = content.toLowerCase();    // to eliminate case sensitivity
-   var x = test.indexOf("<body");
-   if(x == -1) return "";
+	test = content.toLowerCase();    // to eliminate case sensitivity
+	var x = test.indexOf("<body");
+	if(x == -1) return "";
 
-   x = test.indexOf(">", x);
-   if(x == -1) return "";
+	x = test.indexOf(">", x);
+	if(x == -1) return "";
 
-   var y = test.lastIndexOf("</body>");
-   if(y == -1) y = test.lastIndexOf("</html>");
-   if(y == -1) y = content.length;    // If no HTML then just grab everything till end
+	var y = test.lastIndexOf("</body>");
+	if(y == -1) y = test.lastIndexOf("</html>");
+	if(y == -1) y = content.length;    // If no HTML then just grab everything till end
 
-   return content.slice(x + 1, y);   
+	return content.slice(x + 1, y);   
 } 
 
 /**
@@ -671,7 +651,7 @@ function getBody(content)
 	Arguments:
 		url of the other HTML page to load
 		id of the tag that has to hold the content
-*/		
+ */		
 
 function loadHTML(url, fun, storage, param)
 {
@@ -693,51 +673,51 @@ function loadHTML(url, fun, storage, param)
 
 } 
 
-	/**
+/**
 		Callback
 		Assign directly a tag
-	*/		
+ */		
 
 
-	function processHTML(temp, target)
-	{
-		target.innerHTML = temp.innerHTML;
-	}
+function processHTML(temp, target)
+{
+	target.innerHTML = temp.innerHTML;
+}
 
-	function loadWholePage(url)
-	{
-		var y = document.getElementById("storage");
-		var x = document.getElementById("displayed");
-		loadHTML(url, processHTML, x, y);
-	}	
+function loadWholePage(url)
+{
+	var y = document.getElementById("storage");
+	var x = document.getElementById("displayed");
+	loadHTML(url, processHTML, x, y);
+}	
 
 
-	/**
+/**
 		Create responseHTML
 		for acces by DOM's methods
-	*/	
-	
-	function processByDOM(responseHTML, target)
-	{
-		target.innerHTML = "Extracted by id:<br />";
+ */	
 
-		// does not work with Chrome/Safari
-		//var message = responseHTML.getElementsByTagName("div").namedItem("two").innerHTML;
-		var message = responseHTML.getElementsByTagName("div").item(1).innerHTML;
-		
-		target.innerHTML += message;
+function processByDOM(responseHTML, target)
+{
+	target.innerHTML = "Extracted by id:<br />";
 
-		target.innerHTML += "<br />Extracted by name:<br />";
-		
-		message = responseHTML.getElementsByTagName("form").item(0);
-		target.innerHTML += message.dyn.value;
-	}
-	
-	function accessByDOM(url)
-	{
-		//var responseHTML = document.createElement("body");	// Bad for opera
-		var responseHTML = document.getElementById("storage");
-		var y = document.getElementById("displayed");
-		loadHTML(url, processByDOM, responseHTML, y);
-	}	
+	// does not work with Chrome/Safari
+	//var message = responseHTML.getElementsByTagName("div").namedItem("two").innerHTML;
+	var message = responseHTML.getElementsByTagName("div").item(1).innerHTML;
+
+	target.innerHTML += message;
+
+	target.innerHTML += "<br />Extracted by name:<br />";
+
+	message = responseHTML.getElementsByTagName("form").item(0);
+	target.innerHTML += message.dyn.value;
+}
+
+function accessByDOM(url)
+{
+	//var responseHTML = document.createElement("body");	// Bad for opera
+	var responseHTML = document.getElementById("storage");
+	var y = document.getElementById("displayed");
+	loadHTML(url, processByDOM, responseHTML, y);
+}	
 

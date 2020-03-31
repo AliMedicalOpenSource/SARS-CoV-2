@@ -18,7 +18,7 @@ var url_casesComfirmed='https://raw.githubusercontent.com/CSSEGISandData/COVID-1
 var url_casesRecovered='https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/csse_covid_19_time_series/time_series_covid19_recovered_global.csv';
 var url_casesDeaths="https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/csse_covid_19_time_series/time_series_covid19_deaths_global.csv";
 var url_usDataSheet="https://raw.githubusercontent.com/AliMedicalOpenSource/SARS-CoV-2/master/data/us-covid-datashhet";
-
+var url_CanadaCovid='https://raw.githubusercontent.com/AliMedicalOpenSource/CovidDataSets/master/canada/covid19.csv';
 //Create HTTP server and listen on port 3000 for api requests
 const server = http.createServer((req, res) => {
 
@@ -29,9 +29,9 @@ const server = http.createServer((req, res) => {
 	res.setHeader("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept"); 
 	var response={};
 	try{ 
-	var data  =getApiData(req);
-	response["status"]=200;
-	response.data=data; 
+		var data  =getApiData(req);
+		response["status"]=200;
+		response.data=data; 
 	}catch(e){
 		console.log(e); 
 		response["status"]=400;;
@@ -95,9 +95,9 @@ function getCSVJsonArray(url, cb, cbf){
 				getUSData();
 			}
 		}); 
-		 
+
 	})
-	 
+
 
 }
 var casesComfirmed=[];
@@ -134,8 +134,7 @@ function loadcsseCovid19DailyReports(date){
 	var s= date.toLocaleString().split(',')[0] ; 
 	s=(s.split('/')[0].length>1?s.split('/')[0]:'0'+s.split('/')[0])+'-'+
 	(s.split('/')[1].length>1?s.split('/')[1]:'0'+s.split('/')[0])+'-'+
-	(s.split('/')[2].length>1?s.split('/')[2]:'0'+s.split('/')[0])+".csv" ;
-	console.log(s);
+	(s.split('/')[2].length>1?s.split('/')[2]:'0'+s.split('/')[0])+".csv" ; 
 	var caseDataMaster="https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/csse_covid_19_daily_reports/";
 	$.get(caseDataMaster+s, function( data ) {
 		$( ".result" ).html( data ); 
@@ -157,12 +156,20 @@ var cases_usDataSheet=[];
 function loadUSDataSheet(data){
 	cases_usDataSheet.push( data); 
 }
+var cases_caDataSheet=[];
+
+function loadCADataSheet(data){
+	data-
+	cases_caDataSheet.push( data); 
+}
+
 var temp=new Date();
 loadcsseCovid19DailyReports(temp);  
 getCSVJsonArray(url_casesComfirmed, loadCasesComfirmed, console.log);
 getCSVJsonArray(url_casesRecovered, loadCasesRecovered, console.log);
 getCSVJsonArray(url_casesDeaths, loadCasesDeaths, console.log);
 getCSVJsonArray(url_usDataSheet, loadUSDataSheet, console.log);
+getCSVJsonArray(url_CanadaCovid, loadCADataSheet, console.log);
 
 /**** API CALLS *****/
 function getApiData(req){ 
@@ -197,6 +204,31 @@ function getApiData(req){
 				return getSmartData(req.url.replace("getSmartData/",'')) 
 			}
 			return cases_usDataSheet;   
+		case "help":
+			var r ={};
+			r["time_series_covid19_confirmed_global"]=[]
+			r.time_series_covid19_confirmed_global.push("time_series_covid19_confirmed_global");
+			r.time_series_covid19_confirmed_global.push("time_series_covid19_confirmed_global/country"); 
+			r["time_series_covid19_deaths_global"]=[]
+			r.time_series_covid19_deaths_global.push("time_series_covid19_deaths_global");
+			r.time_series_covid19_deaths_global.push("time_series_covid19_deaths_global/country");    
+			r["time_series_covid19_recovered_global"]=[]
+			r.time_series_covid19_recovered_global.push("time_series_covid19_recovered_global");
+			r.time_series_covid19_recovered_global.push("time_series_covid19_recovered_global/county"); 
+			r["csse_covid_19_daily_reports"]=[]
+			r.csse_covid_19_daily_reports.push("csse_covid_19_daily_reports");
+			r.csse_covid_19_daily_reports.push("csse_covid_19_daily_reports/country");         
+			r["getUSAStatsFromCDC"]=[]
+			r.csse_covid_19_daily_reports.push("getUSAStatsFromCDC");
+			r.csse_covid_19_daily_reports.push("getUSAStatsFromCDC/county");    
+			r["getSmartData"]=[]
+			r.getSmartData.push("getSmartData");
+			r.getSmartData.push("getSmartData/county");    
+			return r;   
+		default:
+			return null;
+
+
 		} 
 
 
@@ -210,8 +242,7 @@ function getApiData(req){
 function getcsse_covid_19_daily_reports(req){
 	var region=req.url.split("/")[1];
 	var caseType=req.url.split("/")[2];
-	var res =[]; 
-	console.log(region);
+	var res =[];  
 	csse_covid_19_daily_reports.forEach(function(data){
 		if(data['Country_Region'].toLowerCase().trim() === region.toLowerCase().trim() ){
 			res.push(data); 
@@ -240,26 +271,50 @@ function getcsse_covid_19_daily_reports(req){
  */
 function time_series_covid19_confirmed_global(country){  
 	var x =0; 
-	var data;
+	var data; 
+
+	if(country.indexOf('%20')>0){country=country.split('%20').join(' ');}
+	var province;
+	if(country.indexOf("/")>0){
+		province = country.split('/')[1];
+		country = country.split('/')[0];
+
+	}
 	casesComfirmed.forEach(function (item){
 		data = undefined; 
 		var d= new Date();
 		var s= d.toLocaleString().split(',')[0].replace('2020','20'); 
 
 		if(item['Country/Region'].toLowerCase().trim()===country.toLowerCase().trim()){
-			data =  item[s]; 
-			if(data === undefined){
-				for(var f=0; f<10; f++){
-					d.setTime(d.getTime()-(86400000*f));
-					console.log(" - " +d.toLocaleString().split(',')[0].replace('2020','20'));
-					data =  item[d.toLocaleString().split(',')[0].replace('2020','20')];
-					if(data!=undefined){
-						x+=new Number(data);
-						break;
+			country = item['Country/Region'];
+			if(province==undefined){
+				data =  item[s]; 
+				if(data === undefined){
+					for(var f=0; f<10; f++){
+						d.setTime(d.getTime()-(86400000*f));
+						 console.log(" - " +d.toLocaleString().split(',')[0].replace('2020','20'));
+						data =  item[d.toLocaleString().split(',')[0].replace('2020','20')];
+						if(data!=undefined){
+							x+=new Number(data);
+							break;
+						}
+					}
+				}  else{ 
+					x+=new Number(data);
+				}
+			}else{ 
+				if(item['Province/State']!=undefined && item['Province/State'].toLowerCase().trim()==province.toLowerCase().trim()){
+
+					data =  item[s]; 
+					for(var f=0; f<10; f++){
+						d.setTime(d.getTime()-(86400000*f));
+						 data =  item[d.toLocaleString().split(',')[0].replace('2020','20')];
+						if(data!=undefined){
+							x+=new Number(data);
+							break;
+						}
 					}
 				}
-			}  else{ 
-				x+=new Number(data);
 			}
 		}
 	}) 
@@ -275,28 +330,50 @@ function time_series_covid19_confirmed_global(country){
  */
 function time_series_covid19_deaths_global(country){  
 	var x =0; 
-	var data;
+	var data; 
+	if(country.indexOf('%20')>0){country=country.split('%20').join(' ');}
+	var province;
+	if(country.indexOf("/")>0){
+		province = country.split('/')[1];
+		country = country.split('/')[0];
+
+	}
+ 
 	casesDeaths.forEach(function (item){
 		data = undefined; 
 		var d= new Date();
 		var s= d.toLocaleString().split(',')[0].replace('2020','20');  
 		if(item['Country/Region'].toLowerCase().trim()===country.toLowerCase().trim()){
+			if(province==undefined){
+				data =  item[s]; 
+				if(data === undefined){
+					for(var f=0; f<10; f++){
+						d.setTime(d.getTime()-(86400000*f));
+						 data =  item[d.toLocaleString().split(',')[0].replace('2020','20')];
+						if(data!=undefined){
+							x+=new Number(data);
+							break;
+						}
+					}
+				}  else{ 
+					x+=new Number(data);
+				}
+			}
+		else{ 
+			if(item['Province/State']!=undefined && item['Province/State'].toLowerCase().trim()==province.toLowerCase().trim()){
 
-			data =  item[s]; 
-			if(data === undefined){
+				data =  item[s]; 
 				for(var f=0; f<10; f++){
-					d.setTime(d.getTime()-(86400000*f));
-					console.log(" - " +d.toLocaleString().split(',')[0].replace('2020','20'));
+					d.setTime(d.getTime()-(86400000*f)); 
 					data =  item[d.toLocaleString().split(',')[0].replace('2020','20')];
 					if(data!=undefined){
 						x+=new Number(data);
 						break;
 					}
 				}
-			}  else{ 
-				x+=new Number(data);
 			}
-		}
+
+		}}
 	}) 
 	var xx={};
 	xx['cases']=x
@@ -311,14 +388,22 @@ function time_series_covid19_deaths_global(country){
  */
 function time_series_covid19_recovered_global(country){  
 	var x =0; 
-	var data;
+	var data; 
+
+	if(country.indexOf('%20')>0){country=country.split('%20').join(' ');}
+	var province;
+	if(country.indexOf("/")>0){
+		province = country.split('/')[1];
+		country = country.split('/')[0]; 
+	}
+
+	console.log(country);
 	casesRecovered.forEach(function (item){
 		data = undefined; 
 		var d= new Date();
-		var s= d.toLocaleString().split(',')[0].replace('2020','20'); 
-
-		if(item['Country/Region'].toLowerCase().trim()===country.toLowerCase().trim()){
-
+		var s= d.toLocaleString().split(',')[0].replace('2020','20');  
+		if(item['Country/Region'].toLowerCase().trim()===country.toLowerCase().trim()){ 
+			if(province==undefined){ 
 			data =  item[s]; 
 			if(data === undefined){
 				for(var f=0; f<10; f++){
@@ -333,6 +418,30 @@ function time_series_covid19_recovered_global(country){
 				x+=new Number(data);
 			}
 		}
+	else{  
+		console.log(province);
+		if(item['Province/State']=='Ontario'){
+			console.log(item);
+		}	console.log(item);
+		if(item['Province/State']!=undefined && item['Province/State'].trim().length>0 && item['Province/State'].toLowerCase().trim()==province.toLowerCase().trim()){
+
+			console.log("province");
+			console.log(province) 
+			console.log(item) 
+			data =  item[s]; 
+			for(var f=0; f<10; f++){
+				d.setTime(d.getTime()-(86400000*f));
+				console.log(" - " +d.toLocaleString().split(',')[0].replace('2020','20'));
+				data =  item[d.toLocaleString().split(',')[0].replace('2020','20')];
+				if(data!=undefined){
+					x+=new Number(data);
+					break;
+				}
+			}
+		}
+}
+	
+	}
 	}) 
 	var xx={};
 	xx['cases']=x
@@ -388,20 +497,29 @@ function getUSAStatsFromCDC(state){
 	}
 }
 
-function combineUSData(datafromDataSheet, cdcData){
-	if(casesSmartSet['United States of America']==undefined){
-		casesSmartSet['United States of America']={};
+
+/***
+ * Covert US data to smart set
+ * @param regionName
+ * @param datafromDataSheet
+ * @param cdcData
+ * @returns
+ */
+
+function combineUSData(regionName, datafromDataSheet, cdcData){
+	if(casesSmartSet[regionName]==undefined){
+		casesSmartSet[regionName]={};
 	}
 
-	if(casesSmartSet['United States of America'][cdcData.Jurisdiction]==undefined){
-		casesSmartSet['United States of America'][cdcData.Jurisdiction]={};
+	if(casesSmartSet[regionName][cdcData.Jurisdiction]==undefined){
+		casesSmartSet[regionName][cdcData.Jurisdiction]={};
 	}
 	var r =datafromDataSheet;
 	var data={}
 	data.FIPS ='';
 	data.Admin2 =  "";
 	data.Province_State=cdcData.Jurisdiction
-	data.Country_Region='United States of America'; 
+	data.Country_Region=regionName; 
 	data.Last_Update='';
 	data.Lat= '';
 	data.Long='';
@@ -411,10 +529,48 @@ function combineUSData(datafromDataSheet, cdcData){
 	data.Active='';
 	data.Combined_Key= data.Country_Region+' '+ cdcData.Jurisdiction;
 	data.tested=r.tested;
-	
-	casesSmartSet['United States of America'][cdcData.Jurisdiction]=data;
-	
+
+	casesSmartSet[regionName][cdcData.Jurisdiction]=data;
+
 }
+
+
+/***
+ * Covert CA DATA TO SMART Set
+ * @param regionName
+ * @param datafromDataSheet
+ * @param cdcData
+ * @returns
+ */
+function combineCAData(regionName, datafromDataSheet, cdcData){
+	if(casesSmartSet[regionName]==undefined){
+		casesSmartSet[regionName]={};
+	}
+
+	if(casesSmartSet[regionName][cdcData.Jurisdiction]==undefined){
+		casesSmartSet[regionName][cdcData.Jurisdiction]={};
+	}
+	var r =datafromDataSheet;
+	var data={}
+	data.FIPS ='';
+	data.Admin2 =  "";
+	data.Province_State=cdcData.Jurisdiction
+	data.Country_Region=regionName; 
+	data.Last_Update='';
+	data.Lat= '';
+	data.Long='';
+	data.Confirmed=cdcData.numconf;
+	data.Deaths=cdc.numdeaths
+	data.Recovered=cdcData.numconf-cdcData.numtoday
+	data.Active=cdcData.numtoday;
+	data.Combined_Key= data.Country_Region+' '+ cdcData.prname+ ' '+cdcData.prnameFR;
+	data.tested=r.numtested;
+
+	casesSmartSet[regionName][cdcData.Jurisdiction]=data;
+
+}
+
+
 
 var casesSmartSet={};
 
@@ -422,9 +578,9 @@ function getUSData(county){
 	console.log(cases_usDataSheet);
 
 	cases_usDataSheet.forEach(function (item){
-		console.log(item);
+
 	});
-	 
+
 } 
 
 function getSmartData(region){
@@ -447,14 +603,14 @@ function getSmartData(region){
 						data = province;
 					}
 				} )
-				
+
 			}else{
 				console.log(country);
 				if(country['Province_State'].trim()==''){ 
 					data = country;
 				}
 			}
-			
+
 		}
 	}); 
 	console.log(data);
