@@ -2,10 +2,10 @@
 applications:
 - instances: 1
   timeout: 180
-  name: coviddevdata
+  name: Covid16Data
   buildpack: sdk-for-nodejs
   command: node DataScraper.js
   disk_quota: 1G
   memory: 960MB
   domain: mybluemix.net
-  host: coviddevdata
+  host: Covid16Data
