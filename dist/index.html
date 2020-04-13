@@ -1,1 +1,142 @@
-<!DOCTYPE html><html lang="en"><head><title>Select multiple Features</title><script src="https://cdn.polyfill.io/v2/polyfill.min.js?features=fetch,requestAnimationFrame,Element.prototype.classList,URL"></script><script src="https://cdn.jsdelivr.net/npm/pdfjs-dist@2.3.200/build/pdf.min.js"></script><link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous"><link rel="stylesheet" type="text/css" media="all" href="ol.c93caa99.css"><style>body,html{background-color:#000}#navbarDropdownMenuLink{margin-left:10px}.map{background-color:#605eed;width:100%;height:300px}.menu,menu2{color:#fff;margin-right:10px}.dropbtn{background-color:#4caf50;color:#fff;padding:16px;font-size:16px;border:none;width:45px}.dropdown{position:relative;display:inline-block;height:5px}.dropdown-content{display:none;position:absolute;top:0;background-color:#f1f1f1;min-width:25px;box-shadow:0 8px 16px 0 rgba(0,0,0,.2);z-index:1}.dropdown-content a{color:#000;padding:12px 16px;text-decoration:none;display:block}.dropdown-content a:hover{background-color:#ddd}.dropdown:hover .dropdown-content{display:block}.dropdown:hover .dropbtn{background-color:#3e8e41}#countryMap{width:0;height:400px}.cdcmen{background:url(https://www.naaccr.org/wp-content/uploads/2016/11/cdc-logo-300x220.jpg);background-repeat:no-repeat;background-size:50px 60px}.cdcmen,.li{width:50px;height:20px}.li{background:url(https://www.who.int/ResourcePackages/WHO/assets/dist/images/logos/en/h-logo-blue.svg);background-repeat:no-repeat}#info,#info1,#info2{color:#fff}#ddsfs{width:100%}#menu{color:#fff;height:50px}</style><link rel="stylesheet" href="app1.04a6741d.css"></head><body> <nav class="navbar navbar-light" id="menu"> COVID-19 -&nbsp;&nbsp;&nbsp;Country information <span id="flg"> </span> <ul> <li class="nav-item dropdown"><a class="nav-link dropdown-toggle" href="#" id="navbarDropdownMenuLink" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"> Dropdown link </a> <div class="dropdown-menu" aria-labelledby="navbarDropdownMenuLink"> <a class="dropdown-item" href="https://www.who.int/emergencies/diseases/novel-coronavirus-2019" target="blank">World Health<br>Organization </a> <a class="dropdown-item" href="https://www.cdc.gov/coronavirus/2019-ncov" target="blank">CDC</a> <a class="dropdown-item" href="#">Action</a> <a class="dropdown-item" href="#">Another action</a> <a class="dropdown-item" href="#">Something else here</a> </div> </li> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; </ul> </nav> <div id="map" class="map"></div> <div id="countryMap" class="map inline"></div> <script src="urls.2f1d95de.js"></script> <script src="app1.dcca27dd.js"></script> <div id="ddsfs"> <b id="info"></b> <b id="info1"></b> <b id="info2"></b> <div> <div id="mouse-position"></div> <div> </div> <script src="https://code.jquery.com/jquery-3.4.1.slim.min.js" integrity="sha384-J6qa4849blE2+poT4WnyKhv5vZF5SrPo0iEjwBvKU7imGFAV0wwj1yYfoRSJoZ+n" crossorigin="anonymous"></script> <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js" integrity="sha384-Q6E9RHvbIyZFJoft+2mJbHaEWldlvI9IOYy5n3zV9zzTtmI3UksdQRVvoxMfooAo" crossorigin="anonymous"></script> <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js" integrity="sha384-wfSDF2E50Y2D1uUdj0O3uMBJnjuUD4Ih7YwaYd1iqfktj0Uod8GCExl3Og8ifwB6" crossorigin="anonymous"></script> </div></div></body></html>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<title>Select multiple Features</title>
+<!-- The line below is only needed for old environments like Internet Explorer and Android 4.x -->
+<script src="https://cdn.polyfill.io/v2/polyfill.min.js?features=fetch,requestAnimationFrame,Element.prototype.classList,URL"></script>
+<script src="https://cdn.jsdelivr.net/npm/pdfjs-dist@2.3.200/build/pdf.min.js"></script>
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+<!-- Latest compiled and minified CSS -->
+<link rel="stylesheet" type="text/css" media="all" href="/ol.f5a4db98.css">
+<style>html, body {
+	background-color: black;
+}
+
+#navbarDropdownMenuLink {
+	margin-left: 10px;
+}
+
+.map {
+	background-color: #605EED;
+	width: 100%;
+	height: 300px;
+}
+
+.menu, menu2 {
+	color: white;
+	margin-right: 10px;
+}
+
+.dropbtn {
+	background-color: #4CAF50;
+	color: white;
+	padding: 16px;
+	font-size: 16px;
+	border: none;
+	width: 45px;
+}
+
+.dropdown {
+	position: relative;
+	display: inline-block;
+	height: 5px;
+}
+
+.dropdown-content {
+	display: none;
+	position: absolute;
+	top: 0;
+	background-color: #f1f1f1;
+	min-width: 25px;
+	box-shadow: 0px 8px 16px 0px rgba(0, 0, 0, 0.2);
+	z-index: 1;
+}
+
+.dropdown-content a {
+	color: black;
+	padding: 12px 16px;
+	text-decoration: none;
+	display: block;
+}
+
+.dropdown-content a:hover {
+	background-color: #ddd;
+}
+
+.dropdown:hover .dropdown-content {
+	display: block;
+}
+
+.dropdown:hover .dropbtn {
+	background-color: #3e8e41;
+}
+
+#countryMap {
+	width: 0%;
+	height: 400px; 
+}
+
+.cdcmen {
+	background:
+		url('https://www.naaccr.org/wp-content/uploads/2016/11/cdc-logo-300x220.jpg');
+	width: 50px;
+	height: 20px;
+	background-repeat: no-repeat;
+	background-size: 50px 60px;
+}
+
+.li {
+	width: 50px;
+	height: 20px;
+	background:
+		url('https://www.who.int/ResourcePackages/WHO/assets/dist/images/logos/en/h-logo-blue.svg');
+	height: 20px;
+	background-repeat: no-repeat;
+}
+
+#info1, #info, #info2 {
+	color: white;
+}
+
+#ddsfs{
+width:100%;
+}
+#menu {
+	color: white;
+	height:50px;
+}</style>
+<script src="/ol.f5a4db98.js"></script><link rel="stylesheet" href="/app1.e31bb0bc.css"></head>
+<body> 
+	<nav class="navbar navbar-light" id="menu">
+		COVID-19 -&nbsp;&nbsp;&nbsp;Country information
+<span id="flg"> </span>
+
+		<ul>
+			<li class="nav-item dropdown"><a class="nav-link dropdown-toggle" href="#" id="navbarDropdownMenuLink" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"> Dropdown link </a>
+				<div class="dropdown-menu" aria-labelledby="navbarDropdownMenuLink">
+					<a class="dropdown-item" href="https://www.who.int/emergencies/diseases/novel-coronavirus-2019" target="blank">World Health<br>Organization
+					</a> <a class="dropdown-item" href="https://www.cdc.gov/coronavirus/2019-ncov" target="blank">CDC</a>
+					<a class="dropdown-item" href="#">Action</a> <a class="dropdown-item" href="#">Another action</a> <a class="dropdown-item" href="#">Something else here</a>
+				</div>  </li>  &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;
+		</ul>
+	</nav>
+	<div id="map" class="map"></div>
+	<div id="countryMap" class="map inline"></div>
+	<script src="/urls.13b416b4.js"></script>
+	<script src="/app1.e31bb0bc.js"></script>
+	<div id="ddsfs">
+		<b id="info"></b> 
+		<b id="info1"></b> 
+		<b id="info2"></b> 
+	<div>
+	<div id="mouse-position"></div>
+
+	<div>
+	</div>
+
+	<script src="https://code.jquery.com/jquery-3.4.1.slim.min.js" integrity="sha384-J6qa4849blE2+poT4WnyKhv5vZF5SrPo0iEjwBvKU7imGFAV0wwj1yYfoRSJoZ+n" crossorigin="anonymous"></script>
+	<script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js" integrity="sha384-Q6E9RHvbIyZFJoft+2mJbHaEWldlvI9IOYy5n3zV9zzTtmI3UksdQRVvoxMfooAo" crossorigin="anonymous"></script>
+	<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js" integrity="sha384-wfSDF2E50Y2D1uUdj0O3uMBJnjuUD4Ih7YwaYd1iqfktj0Uod8GCExl3Og8ifwB6" crossorigin="anonymous"></script>
+
+</div></div></body>
+</html>
