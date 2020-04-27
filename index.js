@@ -11,7 +11,7 @@ import {createStringXY} from 'ol/coordinate';
 import $ from "jquery"; 
 const csvFilePath='<path to csv file>';
 const csv=require('csvtojson');
-const apiPort=8010;
+const apiPort=8080;
 const webPort=8000;
 function Request(url , callback, method,fail){ 
 	this.url = url;	this.xhr = new XMLHttpRequest();	
@@ -119,36 +119,48 @@ var selectedCountryName='';
  * @returns
  */
 function getCountryCases(code, name){ 
-	log('getCountryCases : '+code+','+name+')');
-	document.getElementById("info1").innerHTML+= "<span >"+
-	"<center><i>Cases Comfirmed </i>: <span id='cc'>n/a</span><br>"+
-	"<i>Deaths Reported </i>: <span id='dr'>n/a</span></br>"+
-	"<i>Cases Recovered </i>: <span id='cr'>n/a</span></br>"+
-	"<i>Cases Active </i>: <span id='ca'>n/a</span></br>"+
-	"<i>Hospitalized </i>: <span id='ch'>n/a</span></br>"+
-	"<i>Regional CFR  </i>: <span id='cfr'>n/a</span></br></center></span>"; 
-	var smart=false;
+	log('getCountryCases : '+code+','+name+')'); 
+
 	var url1 ="http://127.0.0.1:"+apiPort+"/api/data/";
-
-	if(name.toLowerCase().trim()=='united states of america'){
-
-	}
 
 	url1 ="http://127.0.0.1:"+apiPort+"/api/data/"+selectedCountryName;
 	log('getCountryCases : ' +url1);
 	log()
 	$.getJSON( {
 		url: url1,
-		success: function(data){
-			document.getElementById('mouse-position').innerHTML=selectedCountryName;
+		success: function(data){ 
 			log('getCountryCases : Success ' +url1);
 			data = data.data;
-			setElement('cc', data.caseData.confirmed!=''?data.caseData.confirmed:" - ");
-			setElement('cr', data.caseData.recovered!=''?data.caseData.recovered:" - ");
-			setElement('dr', data.caseData.deaths!=''?data.caseData.deaths:" - ");
-			setElement('cfr', data.caseData.cfr!=''?data.caseData.cfr:" - ");   
-			setElement('ca', data.caseData.active!=''?data.caseData.active:" - ");   
-			setElement('ch', data.caseData.hospitalized!=''?data.caseData.hospitalized:" - ")   
+
+			document.getElementById("info1").innerHTML+= "<div id='div2'> ";
+			if('cc', data.caseData.confirmed!=''){
+				document.getElementById("div2").innerHTML+=  
+				"<i>Cases Comfirmed </i>: <span id='cc'>"+ data.caseData.confirmed+"</span><br>" 
+			if(data.caseData.deaths!=''){
+				document.getElementById("div2").innerHTML+=   "<i>Deaths Reported </i>: <span id='dr'>"+data.caseData.deaths+"</span></br>";
+				
+			}
+				if(data.caseData.recovered!='') 
+					document.getElementById("div2").innerHTML+=   "<i>Reported Deaths </i>: <span id='ca'>"+data.caseData.recovered+"</span></br>" 
+ 
+					if(data.caseData.cfr!='') 
+						document.getElementById("div2").innerHTML+=   "<i>Case Fatality Rate (CFR) </i>: <span id='ca'>"+data.caseData.cfr+"</span></br>" 
+	 
+		
+						if(data.caseData.active!='') 
+							document.getElementById("div2").innerHTML+=   "<i>Cases Active</i>: <span id='ca'>"+data.caseData.active+"</span></br>" 
+		 
+							if(data.caseData.hospitalized!='') 
+								document.getElementById("div2").innerHTML+=   "<i>Case Requiring Hospitalization (CFR) </i>: <span id='ca'>"+data.caseData.hospitalized+"</span></br>" 
+			 
+				
+				
+								document.getElementById("div2").innerHTML+='  </div>'
+			}else{
+				document.getElementById("info1").innerHTML+= "<span >"+
+				"<center><i>No Data Available, Please try again </i>: <span id='cc'>n/a</span><br>"
+			}
+			
 		},
 		error: function (e){
 			console.log(e);
@@ -319,34 +331,46 @@ function clearInfo(){
 /**
  * 
  */ 
+var d = document.getElementById('countryMap'); 
+d.style.width=0; 
 var displayFeatureInfo = function(pixel, m) {  
 	log("displayFeatureInfo()");
 	var feature = m.forEachFeatureAtPixel(pixel, function(feature) {
 		return feature;
 	});    
-	var d = document.getElementById('countryMap');
-	 
-		d.style.width=0;
+	var d = document.getElementById('countryMap'); 
+	 d.style.width=0; 
 	var info = document.getElementById('info');
 	if (feature) { 
- 
-	d.style.width='50%'
-;
+ console.log(feature);
+	d.style.width='50%'; 
 		document.getElementById('info1').innerHTML='';
 		document.getElementById('info').innerHTML='';
 		document.getElementById('info2').innerHTML='';
 		
 		selectedCountry=feature.getId() ;
 		selectedCountryName=feature.get('name'); 
-		getCountryCases(selectedCountry ,feature.get('name') );
 		var imgUrl='';
 		var additionText='';
-	 
-		 
-		if(selectedCountryName=='Taiwan'){ 
+		var code=countriesISO.get(selectedCountryName)?countriesISO.get(selectedCountryName).Code :''; 
+		if(selectedCountryName =='Venezuela'){  
+			code= 've';
+		}else  if(selectedCountryName =='Kosovo'.toLowerCase()){  
+			code= 'xk';
+		}else  if(selectedCountryName.toLowerCase()=='United States of America'.toLowerCase()){  
+				code= 'us'
+			}else 		if(selectedCountryName=='Northern Cyprus'){  
+			 imgUrl='https://upload.wikimedia.org/wikipedia/commons/thumb/a/a6/Flag_of_the_President_of_the_Turkish_Republic_of_Northern_Cyprus.svg/324px-Flag_of_the_President_of_the_Turkish_Republic_of_Northern_Cyprus.svg.png'
+		}else if(selectedCountryName=='Guinea Bissau'){  
+			code='GW';
+			}else if(selectedCountryName=='The Bahamas'){  
+			selectedCountryName = 'Bahamas' ;
+			imgUrl ='https://weathered-dew-3079.corsweb.workers.dev/?https://www.countryflags.io/bs/shiny/64.png' ; 
+		}else if(selectedCountryName=='Taiwan'){ 
 			additionText='Republic Of China';
 				imgUrl ='https://weathered-dew-3079.corsweb.workers.dev/?https://www.countryflags.io/tw/shiny/64.png' ; 
 			}else if(selectedCountryName=='Macedonia'){ 
+				selectedCountryName="North Macedonia";
 				additionText='the Former Yugoslav Republic Of';
 				imgUrl ='https://weathered-dew-3079.corsweb.workers.dev/?https://www.countryflags.io/mk/shiny/64.png' ; 
 			}else if(selectedCountryName=='Somaliland'){
@@ -363,13 +387,16 @@ var displayFeatureInfo = function(pixel, m) {
 			additionText='People\'s Democratic Republic';
 		}else if(selectedCountryName=='Iran'){
 			imgUrl ='https://weathered-dew-3079.corsweb.workers.dev/?https://www.countryflags.io/ir/shiny/64.png'; 
-			adiitionText='Islamic Republic Of';
+			additionText='Islamic Republic Of';
 		}else if(selectedCountryName=='United Republic of Tanzania'){
 			selectedCountryName='Tanzania';
-		}else if(selectedCountryName=='Democratic Republic of the Congo'){
-			selectedCountryName='Congo';
+			code='tz'
+		}else if(selectedCountryName=='Democratic Republic of the Congo'){ 
+			code='cd'
+		}else if(selectedCountryName=='Republic of the Congo'){ 
+			code='cg'
 		}else if(selectedCountryName=='Ivory Coast'){
-			selectedCountryName="Cote d'Ivoire";
+			selectedCountryName="Cote d'Ivoire";code ='iv';
 			additionText='<br>Ivory Coast'
 		}else if(selectedCountryName=='West Bank'){
 			selectedCountryName='Palestinian territories';
@@ -380,13 +407,19 @@ var displayFeatureInfo = function(pixel, m) {
 		}else	if(selectedCountryName=='Russia'){
 			imgUrl ='https://weathered-dew-3079.corsweb.workers.dev/?https://www.countryflags.io/ru/shiny/64.png'; 
 		}else	
-			imgUrl ='https://weathered-dew-3079.corsweb.workers.dev/?https://www.countryflags.io/'+countriesISO.get(selectedCountryName).Code +'/shiny/64.png' ;
-		 
+		{}
+		if(imgUrl==''){
+			imgUrl ='https://weathered-dew-3079.corsweb.workers.dev/?https://www.countryflags.io/'+ code+'/shiny/64.png' ;
+		}
 			 document.getElementById('flg').innerHTML='<img src="'+imgUrl+'">';
 			 
-		 info.innerHTML = "<center><h3>"+feature.getId() + ': ' +selectedCountryName+" </h3><br><h4>" +additionText+" </center></h4>";
+		 info.innerHTML = "<center><h3>"+feature.getId() + ': ' + feature.get('name')
+		 +" </h3><br><h4>" +additionText+" </center></h4>";
+
+		//	getCountryCases(selectedCountry ,feature.get('name') );
+
 			 
-		 
+			getCountryCases(selectedCountry ,selectedCountryName );
 	} else {
 		selectedCountryName="";
 		// info.innerHTML = '&nbsp;';
@@ -446,7 +479,7 @@ var displayProvinceFeature = function(pixel, m) {
 			selectedProvice =feature.get('NAME');
 		}
 		console.log('displayProvinceFeature() : featurename :' + selectedProvice );
-		info2.innerHTML = "<center><h4>"+feature.get('name')+"</center></h4>";
+		info2.innerHTML = "<center><h4>"+selectedProvice+"</center></h4>";
  
 //		document.getElementById("info2").innerHTML+= "<span >"+
 //		"<center><i>Cases Comfirmed </i>: <span id='cc1'>n/a</span><br>"+
@@ -487,38 +520,7 @@ var displayProvinceFeature = function(pixel, m) {
 				console.log(e);
 			}
 		});
-//
-//		var url4 ="http://127.0.0.1:3000/api/time_series_covid19_confirmed_global/";
-//		if(name.toLowerCase().trim()=='united states of america'){
-//			url4 ="http://127.0.0.1:3000/api/getSmartData/";
-//		}
-//		$.getJSON( {
-//			url: url4+name.toLowerCase(),
-//			success: function(data){   
-//				var i = data.data;
-//				document.getElementById("cc1").innerHTML=(!smart)?i.cases:i.Confirmed;
-//				calculateProvince();
-//			},
-//			error: function (e){
-//				console.log(e);
-//			}
-//		});
-//
-//		var url3 ="http://127.0.0.1:3000/api/time_series_covid19_deaths_global/";
-//		if(name.toLowerCase().trim()=='united states of america'){
-//			url3 ="http://127.0.0.1:3000/api/getSmartData/";
-//		}
-//		$.getJSON( {
-//			url:url3+name.toLowerCase(),
-//			success: function(data){   
-//				var i = data.data;
-//				document.getElementById("dr1").innerHTML=(!smart)?i.cases:i.Deaths ;
-//				calculateProvince(); 
-//			},
-//			error: function (e){
-//				console.log(e);
-//			}
-//		});
+ 
 
 
 
@@ -542,7 +544,7 @@ function showHealthAuthoriy( url, id ){
 	document.getElementById(id!=undefined?id:'info2').innerHTML='<a href="'+url+'" target=blank>Canada Government</a>';
 }
 
-
+ 
 function hide(el){
 	document.getElementById(el).setAttribute("display", "none")
 }
@@ -552,7 +554,7 @@ function show(el){
 hide('countryMap') 
 map.stek =null;
 map.on('click', function(evt) { 
-	var geeos='https://raw.githubusercontent.com/AliMedicalOpenSource/GeneralDataSets/master/World/maps/country.geojson';
+	var geeos='/data/geojson/country.geojson'; 
 	vectorLayerCountry.setSource(null);
 	if (evt.dragging) { 
 		return;
@@ -571,20 +573,9 @@ map.on('click', function(evt) {
 		countryMap.layers=map.stek;
 	}
 	map.stek = countryMap.getLayers();
-//	if(selectedCountry=="CAN"){ 
-//	vectorLayerCountry.setSource(new VectorSource({
-//	url: 'https://raw.githubusercontent.com/aaronali/click_that_hood/master/public/data/canada.geojson',
-//	format: new GeoJSON()
-//	}) );
-//	}
-
-
-//	if(selectedCountry=="USA"){ 
-//	vectorLayerCountry.setSource(new VectorSource({
-//	url: url_us_geo_Json,
-//	format: new GeoJSON()
-//	}) );
-//	}
+ 
+	console.log(selectedCountryName);
+	console.log("gettting geojson")
 	var vecLayUrl=null;
 	switch(selectedCountry){
 	case " 1":
@@ -612,11 +603,21 @@ countryMap.on('click', function(evt) {
 
 });
 
-
-
-
-
-
-
+ 
+//Shorthand for $( document ).ready()
+$(function() {
+   document.getElementById('eflag').addEventListener('click',function(d){
+	   console.log(d) 
+	   var d = document.getElementById('countryMap'); 
+	   d.style.width=0;
+		document.getElementById('info1').innerHTML='<center><h2>Earth</h2></center>';
+		document.getElementById('info').innerHTML='';
+		document.getElementById('info2').innerHTML='';
+		selectedCountryName='world'
+			document.getElementById('flg').innerHTML=''
+		getCountryCases(selectedCountry ,selectedCountryName );
+	 
+   } );
+})
 
 

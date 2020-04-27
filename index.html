@@ -78,7 +78,7 @@ html, body {
 }
 
 #countryMap {
-	width: 0%;
+	width: 100%;
 	height: 400px; 
 }
 
@@ -107,15 +107,29 @@ html, body {
 #ddsfs{
 width:100%;
 }
-#menu {
+#menu img{
 	color: white;
 	height:50px;
+}
+
+#flg img{
+ width : 64px;
+}
+#eflag img{
+ width : 64px;
+ height : 64px;
+}
+#div2{
+text-align:center;
 }
 </style>
 </head>
 <body> 
 	<nav class="navbar navbar-light" id="menu" class="menu  dropdown">
 		COVID-19 -&nbsp;&nbsp;&nbsp;Country information
+		<span id='eflag' >
+		<img src='https://upload.wikimedia.org/wikipedia/commons/2/2f/Flag_of_the_United_Nations.svg'/>
+		</span>
 <span id='flg'> </span>
 
 		<ul>
@@ -138,7 +152,6 @@ width:100%;
 	<div id="map" class="map"></div>
 	<div id="countryMap" class="map inline"></div>
 	<script src="urls.js"></script>
-	<script src="index.js"></script>
 	<div id='ddsfs'>
 		<b id="info"></b> 
 		<b id="info1"></b> 
@@ -149,6 +162,7 @@ width:100%;
 	<div>
 	</div>
 
+	<script src="index.js"></script>
 	<script src="https://code.jquery.com/jquery-3.4.1.slim.min.js"
 		integrity="sha384-J6qa4849blE2+poT4WnyKhv5vZF5SrPo0iEjwBvKU7imGFAV0wwj1yYfoRSJoZ+n"
 		crossorigin="anonymous"></script>

@@ -72,7 +72,7 @@
 }
 
 #countryMap {
-	width: 0%;
+	width: 100%;
 	height: 400px; 
 }
 
@@ -101,14 +101,28 @@
 #ddsfs{
 width:100%;
 }
-#menu {
+#menu img{
 	color: white;
 	height:50px;
+}
+
+#flg img{
+ width : 64px;
+}
+#eflag img{
+ width : 64px;
+ height : 64px;
+}
+#div2{
+text-align:center;
 }</style>
-<script src="/ol.f5a4db98.js"></script><link rel="stylesheet" href="/app1.e31bb0bc.css"></head>
+<script src="/ol.f5a4db98.js"></script><link rel="stylesheet" href="/app2.e31bb0bc.css"></head>
 <body> 
 	<nav class="navbar navbar-light" id="menu">
 		COVID-19 -&nbsp;&nbsp;&nbsp;Country information
+		<span id="eflag">
+		<img src="https://upload.wikimedia.org/wikipedia/commons/2/2f/Flag_of_the_United_Nations.svg">
+		</span>
 <span id="flg"> </span>
 
 		<ul>
@@ -123,7 +137,6 @@ width:100%;
 	<div id="map" class="map"></div>
 	<div id="countryMap" class="map inline"></div>
 	<script src="/urls.13b416b4.js"></script>
-	<script src="/app1.e31bb0bc.js"></script>
 	<div id="ddsfs">
 		<b id="info"></b> 
 		<b id="info1"></b> 
@@ -134,6 +147,7 @@ width:100%;
 	<div>
 	</div>
 
+	<script src="/app2.e31bb0bc.js"></script>
 	<script src="https://code.jquery.com/jquery-3.4.1.slim.min.js" integrity="sha384-J6qa4849blE2+poT4WnyKhv5vZF5SrPo0iEjwBvKU7imGFAV0wwj1yYfoRSJoZ+n" crossorigin="anonymous"></script>
 	<script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js" integrity="sha384-Q6E9RHvbIyZFJoft+2mJbHaEWldlvI9IOYy5n3zV9zzTtmI3UksdQRVvoxMfooAo" crossorigin="anonymous"></script>
 	<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js" integrity="sha384-wfSDF2E50Y2D1uUdj0O3uMBJnjuUD4Ih7YwaYd1iqfktj0Uod8GCExl3Og8ifwB6" crossorigin="anonymous"></script>
